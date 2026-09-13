@@ -383,7 +383,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          internal_no: string
+          internal_no?: string
           court_case_no?: string | null
           title: string
           client_id: string
@@ -531,7 +531,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          client_no: string
+          client_no?: string
           name: string
           client_type?: string
           national_id?: string | null
@@ -617,7 +617,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          contract_no: string
+          contract_no?: string
           title: string
           client_id: string
           counterparty?: string | null
@@ -706,7 +706,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          reference_no: string
+          reference_no?: string
           direction: string
           party_type?: string
           party_name: string
@@ -1324,7 +1324,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          invoice_no: string
+          invoice_no?: string
           client_id: string
           case_id?: string | null
           issue_date?: string
@@ -1620,7 +1620,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          receipt_no: string
+          receipt_no?: string
           client_id: string
           case_id?: string | null
           invoice_id?: string | null
@@ -1752,7 +1752,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          poa_no: string
+          poa_no?: string
           client_id: string
           case_id?: string | null
           poa_type?: string

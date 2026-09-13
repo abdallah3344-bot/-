@@ -10,7 +10,7 @@ const USER = process.env.E2E_USER ?? 'admin'
 const PASS = process.env.E2E_PASS ?? 'Admin@2026'
 
 /** المسارات التي يُتوقَّع وجودها. تُضاف مع كل مرحلة. */
-const MODULE_ROUTES = (process.env.E2E_ROUTES ?? '/dashboard').split(',').filter(Boolean)
+const MODULE_ROUTES = (process.env.E2E_ROUTES ?? '/dashboard,/clients,/users,/profile').split(',').filter(Boolean)
 
 const results = []
 const consoleErrors = []
