@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useState } from 'react'
+import { useActionResult } from '@/lib/use-action-result'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, Save } from 'lucide-react'
@@ -29,15 +30,13 @@ export function AccountDialog({ open, onOpenChange, defaults }: Props) {
   const [state, formAction, pending] = useActionState(saveAccountAction, initialState)
   const [type, setType] = useState(defaults?.accountType ?? 'cash')
 
-  useEffect(() => setType(defaults?.accountType ?? 'cash'), [defaults])
-
-  useEffect(() => {
-    if (state.ok && state.message) {
-      toast.success(state.message)
+  useActionResult(state, {
+    onSuccess: (message) => {
+      toast.success(message)
       onOpenChange(false)
       router.refresh()
-    }
-  }, [state, onOpenChange, router])
+    },
+  })
 
   const err = (name: string) => (!state.ok ? state.fieldErrors?.[name] : undefined)
 

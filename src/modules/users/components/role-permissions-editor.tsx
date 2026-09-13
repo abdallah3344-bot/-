@@ -33,7 +33,12 @@ export function RolePermissionsEditor({ roles, permissions, rolePermissions }: P
   const [pending, startTransition] = useTransition()
 
   const activeRole = roles.find((r) => r.id === activeRoleId)
-  const selected = drafts[activeRoleId] ?? new Set<string>()
+
+  // مجموعة جديدة في كل تصيير تُبطل useMemo أدناه، فنُثبّتها
+  const selected = useMemo(
+    () => drafts[activeRoleId] ?? new Set<string>(),
+    [drafts, activeRoleId],
+  )
 
   // صلاحيات مدير النظام ثابتة دائمًا — لا يُسمح بإضعافها.
   const locked = activeRole?.code === 'super_admin'

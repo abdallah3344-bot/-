@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useState } from 'react'
+import { useActionResult } from '@/lib/use-action-result'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, Save } from 'lucide-react'
@@ -46,15 +47,13 @@ export function HearingDialog({ open, onOpenChange, options, defaults, lockedCas
   const [state, formAction, pending] = useActionState(action, initialState)
   const [courtId, setCourtId] = useState(defaults?.courtId ?? NONE)
 
-  useEffect(() => setCourtId(defaults?.courtId ?? NONE), [defaults])
-
-  useEffect(() => {
-    if (state.ok && state.message) {
-      toast.success(state.message)
+  useActionResult(state, {
+    onSuccess: (message) => {
+      toast.success(message)
       onOpenChange(false)
       router.refresh()
-    }
-  }, [state, onOpenChange, router])
+    },
+  })
 
   const err = (name: string) => (!state.ok ? state.fieldErrors?.[name] : undefined)
   const chambers = options.chambers.filter((c) => c.court_id === courtId)

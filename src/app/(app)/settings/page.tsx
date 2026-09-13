@@ -7,6 +7,7 @@ import { OfficeSettingsForm } from '@/modules/settings/components/office-setting
 import { LogoUpload } from '@/modules/settings/components/logo-upload'
 import { LookupManager } from '@/modules/settings/components/lookup-manager'
 import { BackupPanel } from '@/modules/settings/components/backup-panel'
+import { DemoDataPanel } from '@/modules/settings/components/demo-data-panel'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = { title: 'الإعدادات' }
@@ -16,12 +17,13 @@ export default async function SettingsPage() {
   const supabase = await createClient()
   const canEdit = user.permissions.can('settings', 'update')
 
-  const [settingsRes, caseTypes, courts, docCategories, expenseCategories] = await Promise.all([
+  const [settingsRes, caseTypes, courts, docCategories, expenseCategories, demoRes] = await Promise.all([
     supabase.from('settings').select('*').maybeSingle(),
     supabase.from('case_types').select('id, name_ar, is_active').order('sort_order'),
     supabase.from('courts').select('id, name_ar, governorate, is_active').order('name_ar'),
     supabase.from('document_categories').select('id, name_ar, is_active').order('sort_order'),
     supabase.from('expense_categories').select('id, name_ar, is_active').order('sort_order'),
+    supabase.from('clients').select('id', { count: 'exact', head: true }).eq('is_demo', true),
   ])
 
   const settings = (settingsRes.data ?? {}) as Record<string, unknown>
@@ -87,8 +89,9 @@ export default async function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="backup">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl space-y-4">
             <BackupPanel frequency={String(settings.backup_frequency ?? 'daily')} />
+            {canEdit ? <DemoDataPanel demoCount={demoRes.count ?? 0} /> : null}
           </div>
         </TabsContent>
       </Tabs>

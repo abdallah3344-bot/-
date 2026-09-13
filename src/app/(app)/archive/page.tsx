@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { requirePermission } from '@/lib/auth/session'
 import { listCases, getCaseFormOptions, type CaseRow } from '@/modules/cases/queries'
 import { PageHeader } from '@/components/shared/page-header'

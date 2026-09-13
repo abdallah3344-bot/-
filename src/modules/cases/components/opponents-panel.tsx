@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useState } from 'react'
+import { useActionResult } from '@/lib/use-action-result'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, Plus, Pencil, Trash2, Save, UserRound } from 'lucide-react'
@@ -43,14 +44,14 @@ export function OpponentsPanel({ caseId, opponents, canEdit }: Props) {
   const [open, setOpen] = useState(false)
   const [state, formAction, pending] = useActionState(saveOpponentAction, initialState)
 
-  useEffect(() => {
-    if (state.ok && state.message) {
-      toast.success(state.message)
+  useActionResult(state, {
+    onSuccess: (message) => {
+      toast.success(message)
       setOpen(false)
       setEditing(null)
       router.refresh()
-    }
-  }, [state, router])
+    },
+  })
 
   const err = (name: string) => (!state.ok ? state.fieldErrors?.[name] : undefined)
 

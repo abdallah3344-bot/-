@@ -226,7 +226,10 @@ export function HearingsView({
         }
       />
 
+      {/* key يُعيد تركيب الحوار عند تغيّر الجلسة المعروضة،
+          فتُعاد حالته الداخلية (المحكمة المختارة) دون تأثيرات. */}
       <HearingDialog
+        key={editing?.id ?? 'new'}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         options={options}

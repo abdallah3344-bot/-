@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useState } from 'react'
+import { useActionResult } from '@/lib/use-action-result'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, Upload, Scale } from 'lucide-react'
@@ -18,13 +19,13 @@ export function LogoUpload({ currentUrl }: { currentUrl: string | null }) {
   const [state, formAction, pending] = useActionState(uploadLogoAction, initialState)
   const [preview, setPreview] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (state.ok && state.message) {
-      toast.success(state.message)
+  useActionResult(state, {
+    onSuccess: (message) => {
+      toast.success(message)
       setPreview(null)
       router.refresh()
-    }
-  }, [state, router])
+    },
+  })
 
   return (
     <Card>

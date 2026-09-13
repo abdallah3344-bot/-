@@ -10,7 +10,7 @@ import { Pagination } from '@/components/shared/pagination'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { UserRowActions } from '@/modules/users/components/user-row-actions'
-import { formatDate, timeAgo, initials } from '@/lib/utils'
+import { timeAgo, initials } from '@/lib/utils'
 import type { SearchParams } from '@/lib/query'
 import type { UserRow } from '@/modules/users/queries'
 

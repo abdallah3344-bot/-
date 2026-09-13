@@ -44,7 +44,7 @@ export async function createUserAction(_prev: unknown, formData: FormData): Prom
   const input = parsed.data
   const supabase = await createClient()
 
-  const { data: userId, error } = await supabase.rpc('create_office_user', {
+  const { error } = await supabase.rpc('create_office_user', {
     _email: input.email,
     _password: input.password,
     _username: input.username,

@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { Menu, Bell, Sun, Moon, User, KeyRound, ChevronDown } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
 import { GlobalSearch } from './global-search'
 import { LogoutItem } from './logout-item'
 import { Button } from '@/components/ui/button'
@@ -21,12 +20,7 @@ type Props = {
 }
 
 export function Header({ user, canSearch, unreadCount, onMenuClick }: Props) {
-  const { theme, resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
-
-  const isDark = mounted && (resolvedTheme ?? theme) === 'dark'
+  const { setTheme } = useTheme()
 
   return (
     <header className="app-header sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-surface px-4 sm:px-6">
@@ -42,21 +36,19 @@ export function Header({ user, canSearch, unreadCount, onMenuClick }: Props) {
 
       <div className="flex items-center gap-1 ms-auto">
         {/* تبديل الوضع الليلي */}
-        {/* الوضع الحالي معروف بعد التركيب فقط (يُقرأ من التخزين المحلي)،
-            لذا نُثبّت المحتوى قبل ذلك لتفادي اختلاف الترطيب. */}
+        {/* الوضع الحالي لا يُعرف إلا في المتصفح (يُقرأ من التخزين المحلي).
+            نعرض الأيقونتين ونُظهر المناسبة عبر CSS بدل رصد التركيب
+            بـ useEffect + setState، فلا تصيير متتالٍ ولا اختلاف ترطيب. */}
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setTheme(isDark ? 'light' : 'dark')}
-          aria-label={
-            !mounted
-              ? 'تبديل الوضع الليلي'
-              : isDark
-                ? 'التبديل للوضع النهاري'
-                : 'التبديل للوضع الليلي'
+          onClick={() =>
+            setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark')
           }
+          aria-label="تبديل الوضع الليلي"
         >
-          {mounted && isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          <Moon className="size-5 dark:hidden" />
+          <Sun className="hidden size-5 dark:block" />
         </Button>
 
         {/* التنبيهات */}

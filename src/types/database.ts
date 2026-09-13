@@ -194,6 +194,7 @@ export type Database = {
           created_at: string
           updated_at: string
           created_by: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -206,6 +207,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           created_by?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -218,6 +220,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           created_by?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -380,6 +383,7 @@ export type Database = {
           created_by: string | null
           updated_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -410,6 +414,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -440,6 +445,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -528,6 +534,7 @@ export type Database = {
           created_by: string | null
           updated_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -549,6 +556,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -570,6 +578,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -703,6 +712,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -722,6 +732,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -741,6 +752,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -899,6 +911,7 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -920,6 +933,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -941,6 +955,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -1024,6 +1039,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -1041,6 +1057,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -1058,6 +1075,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -1164,6 +1182,7 @@ export type Database = {
           created_by: string | null
           updated_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -1187,6 +1206,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -1210,6 +1230,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -1321,6 +1342,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -1341,6 +1363,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -1361,6 +1384,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -1565,6 +1589,7 @@ export type Database = {
           notes: string | null
           created_at: string
           updated_at: string
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -1579,6 +1604,7 @@ export type Database = {
           notes?: string | null
           created_at?: string
           updated_at?: string
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -1593,6 +1619,7 @@ export type Database = {
           notes?: string | null
           created_at?: string
           updated_at?: string
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -1623,6 +1650,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -1642,6 +1670,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -1661,6 +1690,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -2061,6 +2091,7 @@ export type Database = {
           created_by: string | null
           updated_by: string | null
           deleted_at: string | null
+          is_demo: boolean
         }
         Insert: {
           id?: string
@@ -2079,6 +2110,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Update: {
           id?: string
@@ -2097,6 +2129,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          is_demo?: boolean
         }
         Relationships: [
           {
@@ -2241,6 +2274,10 @@ export type Database = {
         Args: Record<string, unknown>
         Returns: Json
       }
+      clear_demo_data: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
       create_office_user: {
         Args: Record<string, unknown>
         Returns: Json
@@ -2250,10 +2287,6 @@ export type Database = {
         Returns: Json
       }
       dashboard_stats: {
-        Args: Record<string, unknown>
-        Returns: Json
-      }
-      export_migrations: {
         Args: Record<string, unknown>
         Returns: Json
       }
@@ -2293,10 +2326,6 @@ export type Database = {
         Args: Record<string, unknown>
         Returns: Json
       }
-      next_sequence_number: {
-        Args: Record<string, unknown>
-        Returns: Json
-      }
       resolve_login_email: {
         Args: Record<string, unknown>
         Returns: Json
@@ -2304,6 +2333,10 @@ export type Database = {
       restore_record: {
         Args: Record<string, unknown>
         Returns: undefined
+      }
+      seed_demo_data: {
+        Args: Record<string, unknown>
+        Returns: Json
       }
       set_user_password: {
         Args: Record<string, unknown>

@@ -36,13 +36,16 @@ export function PaymentsView({
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Record<string, string | null> | null>(null)
 
-  // الوصول من صفحة الفاتورة بـ ?invoice=... يفتح النموذج مباشرة
+  // الوصول من صفحة الفاتورة بـ ?invoice=... يفتح النموذج مباشرة.
+  // التحديث داخل مؤقّت صفري لا في جسم التأثير، تفاديًا للتصيير المتتالي.
   useEffect(() => {
     const invoiceId = searchParams.get('invoice')
-    if (invoiceId) {
+    if (!invoiceId) return
+    const timer = setTimeout(() => {
       setEditing({ invoiceId })
       setOpen(true)
-    }
+    }, 0)
+    return () => clearTimeout(timer)
   }, [searchParams])
 
   const columns: Column<PaymentRow>[] = [

@@ -37,9 +37,14 @@ export function FilterBar({ searchPlaceholder = 'بحث...', filters = [] }: Pro
 
   const [term, setTerm] = useState(searchParams.get('q') ?? '')
 
-  // مزامنة الحقل عند تغيّر الرابط من الخارج (مثل زر الرجوع)
+  // مزامنة الحقل عند تغيّر الرابط من الخارج (مثل زر الرجوع).
+  // التحديث داخل مؤقّت صفري لا في جسم التأثير، تفاديًا للتصيير المتتالي.
   useEffect(() => {
-    setTerm(searchParams.get('q') ?? '')
+    const next = searchParams.get('q') ?? ''
+    const timer = setTimeout(() => {
+      setTerm((current) => (current === next ? current : next))
+    }, 0)
+    return () => clearTimeout(timer)
   }, [searchParams])
 
   // بحث مؤجّل — لا نُرهق الخادم بكل ضغطة مفتاح

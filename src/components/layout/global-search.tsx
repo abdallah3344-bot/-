@@ -74,14 +74,17 @@ export function GlobalSearch() {
   // بحث مؤجّل
   useEffect(() => {
     const term = query.trim()
-    if (term.length < 2) {
-      setResults([])
-      setLoading(false)
-      return
-    }
 
-    setLoading(true)
+    // كل تحديث للحالة يجري داخل مؤقّت أو بعد انتظار، لا في جسم التأثير
+    // مباشرة، تفاديًا للتصيير المتتالي.
     const timer = setTimeout(async () => {
+      if (term.length < 2) {
+        setResults([])
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
       const supabase = createClient()
       const { data, error } = await supabase.rpc('global_search', {
         q: term,

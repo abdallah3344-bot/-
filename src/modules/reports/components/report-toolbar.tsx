@@ -3,7 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { Printer, FileSpreadsheet, Filter, X, Loader2 } from 'lucide-react'
-import type { ReportDefinition, ReportColumn } from '../definitions'
+import type { ReportDefinition } from '../definitions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

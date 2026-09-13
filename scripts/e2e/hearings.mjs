@@ -82,7 +82,9 @@ try {
   check('نطاق الغد يستبعد جلسة اليوم', !tomorrowVisible)
 
   // ---------- تسجيل النتيجة مع التأجيل ينشئ الجلسة القادمة ----------
-  await page.goto(`${BASE}/hearings?range=today`, { waitUntil: 'networkidle' })
+  // نُصفّي بالقضية: قد توجد جلسات أخرى في اليوم نفسه لقضايا أخرى،
+  // فالنقر على أول زرّ في القائمة العامة قد يصيب جلسة غير جلستنا.
+  await page.goto(`${BASE}/hearings?case=${caseId}`, { waitUntil: 'networkidle' })
   await page.click('button[aria-label^="إجراءات جلسة"]')
   await page.click('[role=menuitem]:has-text("تسجيل نتيجة الجلسة")')
   await page.waitForSelector('#rr-result', { timeout: 10000 })
@@ -93,10 +95,10 @@ try {
   await page.click('button:has-text("حفظ النتيجة")')
   await page.waitForTimeout(3500)
 
-  await page.goto(`${BASE}/hearings?range=week`, { waitUntil: 'networkidle' })
-  const bodyWeek = await page.textContent('body')
-  const nextCreated = bodyWeek?.includes(CASE_TITLE)
-  check('التأجيل ينشئ الجلسة القادمة تلقائيًا', Boolean(nextCreated))
+  await page.goto(`${BASE}/hearings?case=${caseId}`, { waitUntil: 'networkidle' })
+  const caseHearingRows = await page.locator('tbody tr').count()
+  check('التأجيل ينشئ الجلسة القادمة تلقائيًا', caseHearingRows >= 2,
+        `${caseHearingRows} جلسة للقضية`)
 
   // النتيجة محفوظة على الجلسة الأصلية
   await page.goto(`${BASE}/cases/${caseId}`, { waitUntil: 'networkidle' })

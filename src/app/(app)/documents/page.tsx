@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { FilterBar } from '@/components/shared/filter-bar'
 import { Pagination } from '@/components/shared/pagination'
 import { DocumentsView } from '@/modules/documents/components/documents-view'
+import { getOcrStatusAction } from '@/modules/ocr/actions'
 import type { SearchParams } from '@/lib/query'
 
 export const metadata: Metadata = { title: 'المستندات' }
@@ -20,11 +21,12 @@ export default async function DocumentsPage({
   const params = await searchParams
   const supabase = await createClient()
 
-  const [{ rows, total, page, pageSize }, categories, cases, clientsRes] = await Promise.all([
+  const [{ rows, total, page, pageSize }, categories, cases, clientsRes, ocr] = await Promise.all([
     listDocuments(params),
     listDocumentCategories(),
     listOpenCases(),
     supabase.from('clients').select('id, name').is('deleted_at', null).order('name').limit(1000),
+    getOcrStatusAction(),
   ])
 
   return (
@@ -48,6 +50,8 @@ export default async function DocumentsPage({
         canUpdate={user.permissions.can('documents', 'update')}
         canDelete={user.permissions.can('documents', 'delete')}
         canDownload={user.permissions.can('documents', 'download')}
+        ocrConfigured={ocr.configured}
+        providerName={ocr.providerName}
       />
 
       <Pagination page={page} pageSize={pageSize} total={total} />

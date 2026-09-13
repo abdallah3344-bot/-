@@ -132,7 +132,11 @@ export function AccountsView({ accounts, canCreate, canUpdate, currencySymbol }:
         </ul>
       )}
 
-      <AccountDialog open={open} onOpenChange={setOpen} defaults={editing} />
+      {/* key يُعيد تركيب الحوار عند تغيّر الحساب المعروض */}
+      <AccountDialog
+        key={editing?.id ?? 'new'}
+        open={open} onOpenChange={setOpen} defaults={editing}
+      />
     </>
   )
 }

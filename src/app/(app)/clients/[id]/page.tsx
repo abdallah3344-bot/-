@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Pencil, Briefcase, Phone, MessageCircle, Printer } from 'lucide-react'
+import { Pencil, Briefcase, Phone, MessageCircle } from 'lucide-react'
 import { requirePermission } from '@/lib/auth/session'
 import { getClient, getClientSummary } from '@/modules/clients/queries'
 import { createClient as createSupabase } from '@/lib/supabase/server'

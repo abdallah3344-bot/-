@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useEffect, useRef, useState } from 'react'
+import { useActionState, useRef, useState } from 'react'
+import { useActionResult } from '@/lib/use-action-result'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, Upload, FileText } from 'lucide-react'
@@ -46,14 +47,14 @@ export function UploadDialog({
   const [file, setFile] = useState<File | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (state.ok && state.message) {
-      toast.success(state.message)
+  useActionResult(state, {
+    onSuccess: (message) => {
+      toast.success(message)
       onOpenChange(false)
       setFile(null)
       router.refresh()
-    }
-  }, [state, onOpenChange, router])
+    },
+  })
 
   const err = (name: string) => (!state.ok ? state.fieldErrors?.[name] : undefined)
 

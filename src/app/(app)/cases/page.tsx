@@ -10,7 +10,6 @@ import { Pagination } from '@/components/shared/pagination'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CaseRowActions } from '@/modules/cases/components/case-row-actions'
-import { formatDate, formatMoney } from '@/lib/utils'
 import type { SearchParams } from '@/lib/query'
 import {
   CASE_STATUSES, CASE_STATUS_LABELS, CASE_STATUS_TONE,

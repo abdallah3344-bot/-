@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requirePermission } from '@/lib/auth/session'
 import {
-  listHearings, getHearingCounts, listOpenCases, resolveRange,
-} from '@/modules/hearings/queries'
+  listHearings, getHearingCounts, listOpenCases, } from '@/modules/hearings/queries'
 import { getCaseFormOptions } from '@/modules/cases/queries'
 import { PageHeader } from '@/components/shared/page-header'
 import { FilterBar } from '@/components/shared/filter-bar'

@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/empty-state'
 import { CaseCharts } from '@/modules/dashboard/components/case-charts'
 import { formatMoney, formatDate, formatTime } from '@/lib/utils'
-import { CASE_STATUS_LABELS, CASE_STATUS_TONE } from '@/lib/constants/enums'
 
 export const metadata: Metadata = { title: 'لوحة التحكم' }
 

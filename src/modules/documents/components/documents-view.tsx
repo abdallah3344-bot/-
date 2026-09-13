@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   Upload, MoreHorizontal, Eye, Download, Pencil, Trash2, FileText,
-  FileSpreadsheet, FileImage, Loader2,
+  FileSpreadsheet, FileImage, Loader2, ScanText,
 } from 'lucide-react'
 import { UploadDialog, type UploadOptions } from './upload-dialog'
 import { EditDocumentDialog } from './edit-document-dialog'
+import { ExtractionReview } from '@/modules/ocr/components/extraction-review'
 import { getDocumentUrlAction, deleteDocumentAction } from '../actions'
 import type { DocumentRow } from '../queries'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
@@ -29,6 +30,8 @@ type Props = {
   canUpdate: boolean
   canDelete: boolean
   canDownload: boolean
+  ocrConfigured: boolean
+  providerName: string
   lockedCaseId?: string
   lockedClientId?: string
 }
@@ -44,11 +47,12 @@ function FileIcon({ mime }: { mime: string | null }) {
 
 export function DocumentsView({
   rows, options, canCreate, canUpdate, canDelete, canDownload,
-  lockedCaseId, lockedClientId,
+  ocrConfigured, providerName, lockedCaseId, lockedClientId,
 }: Props) {
   const router = useRouter()
   const [uploadOpen, setUploadOpen] = useState(false)
   const [editing, setEditing] = useState<DocumentRow | null>(null)
+  const [reviewing, setReviewing] = useState<DocumentRow | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
@@ -157,10 +161,16 @@ export function DocumentsView({
             ) : null}
 
             {canUpdate ? (
-              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setEditing(row) }}>
-                <Pencil />
-                إعادة تسمية وتصنيف
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setEditing(row) }}>
+                  <Pencil />
+                  إعادة تسمية وتصنيف
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setReviewing(row) }}>
+                  <ScanText />
+                  مراجعة البيانات وربطها
+                </DropdownMenuItem>
+              </>
             ) : null}
 
             {canDelete ? (
@@ -217,6 +227,30 @@ export function DocumentsView({
         open={uploadOpen} onOpenChange={setUploadOpen} options={options}
         lockedCaseId={lockedCaseId} lockedClientId={lockedClientId}
       />
+
+      {reviewing ? (
+        <ExtractionReview
+          open={Boolean(reviewing)}
+          onOpenChange={(open) => !open && setReviewing(null)}
+          ocrConfigured={ocrConfigured}
+          providerName={providerName}
+          document={{
+            id: reviewing.id,
+            name: reviewing.name,
+            ocr_status: reviewing.ocr_status,
+            case_id: reviewing.case_id,
+            client_id: reviewing.client_id,
+            category_id: reviewing.category_id,
+            doc_date: reviewing.doc_date,
+            description: reviewing.description,
+          }}
+          options={{
+            cases: options.cases,
+            clients: options.clients,
+            categories: options.categories,
+          }}
+        />
+      ) : null}
 
       {editing ? (
         <EditDocumentDialog
