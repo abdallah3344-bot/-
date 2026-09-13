@@ -10,7 +10,7 @@ const USER = process.env.E2E_USER ?? 'admin'
 const PASS = process.env.E2E_PASS ?? 'Admin@2026'
 
 /** المسارات التي يُتوقَّع وجودها. تُضاف مع كل مرحلة. */
-const MODULE_ROUTES = (process.env.E2E_ROUTES ?? '/dashboard,/clients,/cases,/hearings,/calendar,/tasks,/documents,/powers-of-attorney,/contracts,/fees,/invoices,/payments,/expenses,/accounts,/archive,/users,/profile').split(',').filter(Boolean)
+const MODULE_ROUTES = (process.env.E2E_ROUTES ?? '/dashboard,/clients,/cases,/hearings,/calendar,/tasks,/documents,/powers-of-attorney,/contracts,/fees,/invoices,/payments,/expenses,/accounts,/reports,/archive,/users,/profile').split(',').filter(Boolean)
 
 const results = []
 const consoleErrors = []
