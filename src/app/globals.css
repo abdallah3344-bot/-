@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+/* ============================================================
+   نظام إدارة مكتب المحاماة — الهوية البصرية
+   كحلي داكن · ذهبي · أبيض · رمادي فاتح
+   ============================================================ */
+
+@theme {
+  --font-sans: var(--font-arabic), "Segoe UI", system-ui, sans-serif;
+
+  /* الكحلي */
+  --color-navy-50:  #f2f5fa;
+  --color-navy-100: #e3e9f4;
+  --color-navy-200: #c7d3e8;
+  --color-navy-300: #9bb0d6;
+  --color-navy-400: #6885bd;
+  --color-navy-500: #4463a3;
+  --color-navy-600: #334d87;
+  --color-navy-700: #2a3e6d;
+  --color-navy-800: #1c2b50;
+  --color-navy-900: #0f1e3d;
+  --color-navy-950: #0a1428;
+
+  /* الذهبي */
+  --color-gold-50:  #fbf8ed;
+  --color-gold-100: #f5edd0;
+  --color-gold-200: #ebd9a3;
+  --color-gold-300: #dfc06d;
+  --color-gold-400: #d4a943;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a8801e;
+  --color-gold-700: #85611b;
+  --color-gold-800: #6f4f1e;
+  --color-gold-900: #5f421e;
+}
+
+/* ------------------------------------------------------------
+   الرموز الدلالية — تتبدّل مع الوضع الليلي
+   ------------------------------------------------------------ */
+:root {
+  --background:        #f4f5f7;
+  --surface:           #ffffff;
+  --surface-muted:     #f8f9fb;
+  --foreground:        #0f1e3d;
+  --muted-foreground:  #5b6780;
+  --border:            #e2e5ec;
+  --input:             #ffffff;
+  --primary:           #0f1e3d;
+  --primary-foreground:#ffffff;
+  --accent:            #c9a227;
+  --accent-foreground: #0f1e3d;
+  --sidebar:           #0f1e3d;
+  --sidebar-foreground:#dbe3f2;
+  --sidebar-active:    #1c2b50;
+  --danger:            #b91c1c;
+  --success:           #047857;
+  --warning:           #b45309;
+  --ring:              #c9a227;
+  --radius:            0.625rem;
+}
+
+.dark {
+  --background:        #0a1428;
+  --surface:           #0f1e3d;
+  --surface-muted:     #14244a;
+  --foreground:        #e8edf7;
+  --muted-foreground:  #94a3c4;
+  --border:            #223257;
+  --input:             #14244a;
+  --primary:           #c9a227;
+  --primary-foreground:#0a1428;
+  --accent:            #d4a943;
+  --accent-foreground: #0a1428;
+  --sidebar:           #070f1f;
+  --sidebar-foreground:#c7d3e8;
+  --sidebar-active:    #16264b;
+  --danger:            #ef4444;
+  --success:           #10b981;
+  --warning:           #f59e0b;
+  --ring:              #c9a227;
+}
+
+@theme inline {
+  --color-background:       var(--background);
+  --color-surface:          var(--surface);
+  --color-surface-muted:    var(--surface-muted);
+  --color-foreground:       var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border:           var(--border);
+  --color-input:            var(--input);
+  --color-primary:          var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent:           var(--accent);
+  --color-accent-foreground:var(--accent-foreground);
+  --color-sidebar:          var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-active:   var(--sidebar-active);
+  --color-danger:           var(--danger);
+  --color-success:          var(--success);
+  --color-warning:          var(--warning);
+  --color-ring:             var(--ring);
+  --radius-app:             var(--radius);
+}
+
+/* ------------------------------------------------------------
+   الأساسيات
+   ------------------------------------------------------------ */
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* الأرقام لاتينية دائمًا داخل النص العربي — أوضح للمبالغ وأرقام القضايا */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* شريط التمرير */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); background-clip: content-box; }
+
+/* حلقة التركيز — مهمة لإمكانية الوصول */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------
+   الطباعة — تُستخدم للفواتير وإيصالات القبض والتقارير
+   ------------------------------------------------------------ */
+@media print {
+  @page { margin: 14mm; size: A4; }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .no-print,
+  aside,
+  header.app-header { display: none !important; }
+
+  .print-only { display: block !important; }
+
+  main { padding: 0 !important; margin: 0 !important; }
+
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  table { break-inside: auto; }
+  tr    { break-inside: avoid; break-after: auto; }
+  thead { display: table-header-group; }
+}
+
+.print-only { display: none; }

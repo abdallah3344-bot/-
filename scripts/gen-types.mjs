@@ -1,0 +1,149 @@
+/**
+ * يولّد src/types/database.ts من المخطط الحيّ في Supabase.
+ * التشغيل:  npm run types:gen
+ *
+ * يُستخدم بدلًا من `supabase gen types` لأن الأخير يتطلب SUPABASE_ACCESS_TOKEN،
+ * بينما هذا السكربت يعمل بمفتاح المشروع العام وحساب مدير النظام.
+ */
+import { writeFileSync } from 'node:fs'
+import { config } from 'dotenv'
+
+config({ path: '.env.local', quiet: true })
+
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const EMAIL = process.env.TYPEGEN_EMAIL ?? 'admin@lawoffice.local'
+const PASSWORD = process.env.TYPEGEN_PASSWORD ?? 'Admin@2026'
+
+if (!URL || !KEY) {
+  console.error('✖ NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY مطلوبان في .env.local')
+  process.exit(1)
+}
+
+/** تحويل نوع PostgreSQL إلى نوع TypeScript. */
+function tsType(pg) {
+  const t = pg.replace(/\(.*\)/, '').trim()
+  if (t.endsWith('[]')) return `${tsType(t.slice(0, -2))}[]`
+  switch (t) {
+    case 'uuid': case 'text': case 'character varying': case 'character':
+    case 'date': case 'time without time zone': case 'time with time zone':
+    case 'timestamp with time zone': case 'timestamp without time zone':
+      return 'string'
+    case 'smallint': case 'integer': case 'bigint': case 'numeric':
+    case 'real': case 'double precision':
+      return 'number'
+    case 'boolean': return 'boolean'
+    case 'json': case 'jsonb': return 'Json'
+    default: return 'unknown'
+  }
+}
+
+const auth = await fetch(`${URL}/auth/v1/token?grant_type=password`, {
+  method: 'POST',
+  headers: { apikey: KEY, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+}).then((r) => r.json())
+
+if (!auth.access_token) {
+  console.error('✖ فشل تسجيل الدخول لتوليد الأنواع:', auth.error_description ?? auth.msg ?? '')
+  process.exit(1)
+}
+
+const schema = await fetch(`${URL}/rest/v1/rpc/introspect_schema`, {
+  method: 'POST',
+  headers: {
+    apikey: KEY,
+    Authorization: `Bearer ${auth.access_token}`,
+    'Content-Type': 'application/json',
+  },
+  body: '{}',
+}).then((r) => r.json())
+
+if (!schema?.tables) {
+  console.error('✖ تعذّر قراءة المخطط:', JSON.stringify(schema).slice(0, 300))
+  process.exit(1)
+}
+
+const lines = [
+  '// ⚠️ ملف مولَّد تلقائيًا — لا تعدّله يدويًا.',
+  '// أعد توليده بعد أي تغيير في قاعدة البيانات:  npm run types:gen',
+  '',
+  'export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]',
+  '',
+  'export type Database = {',
+  '  public: {',
+  '    Tables: {',
+]
+
+for (const table of schema.tables) {
+  const cols = table.columns ?? []
+  lines.push(`      ${table.table_name}: {`)
+
+  lines.push('        Row: {')
+  for (const c of cols) {
+    lines.push(`          ${c.name}: ${tsType(c.type)}${c.nullable ? ' | null' : ''}`)
+  }
+  lines.push('        }')
+
+  lines.push('        Insert: {')
+  for (const c of cols) {
+    if (c.generated) continue
+    const optional = c.nullable || c.has_default ? '?' : ''
+    lines.push(`          ${c.name}${optional}: ${tsType(c.type)}${c.nullable ? ' | null' : ''}`)
+  }
+  lines.push('        }')
+
+  lines.push('        Update: {')
+  for (const c of cols) {
+    if (c.generated) continue
+    lines.push(`          ${c.name}?: ${tsType(c.type)}${c.nullable ? ' | null' : ''}`)
+  }
+  lines.push('        }')
+
+  const fks = table.foreign_keys ?? []
+  if (fks.length === 0) {
+    lines.push('        Relationships: []')
+  } else {
+    lines.push('        Relationships: [')
+    for (const fk of fks) {
+      lines.push('          {')
+      lines.push(`            foreignKeyName: ${JSON.stringify(fk.constraint_name)}`)
+      lines.push(`            columns: ${JSON.stringify(fk.columns ?? [])}`)
+      lines.push(`            isOneToOne: ${fk.is_one_to_one ? 'true' : 'false'}`)
+      lines.push(`            referencedRelation: ${JSON.stringify(fk.ref_table)}`)
+      lines.push(`            referencedColumns: ${JSON.stringify(fk.ref_columns ?? [])}`)
+      lines.push('          },')
+    }
+    lines.push('        ]')
+  }
+  lines.push('      }')
+}
+
+lines.push('    }')
+lines.push('    Views: Record<string, never>')
+lines.push('    Functions: {')
+
+const seen = new Set()
+for (const fn of schema.functions ?? []) {
+  if (seen.has(fn.function_name)) continue
+  seen.add(fn.function_name)
+  lines.push(`      ${fn.function_name}: {`)
+  lines.push('        Args: Record<string, unknown>')
+  lines.push(`        Returns: ${fn.returns === 'void' ? 'undefined' : 'Json'}`)
+  lines.push('      }')
+}
+
+lines.push('    }')
+lines.push('    Enums: Record<string, never>')
+lines.push('    CompositeTypes: Record<string, never>')
+lines.push('  }')
+lines.push('}')
+lines.push('')
+lines.push('type PublicSchema = Database["public"]')
+lines.push('export type Tables<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Row"]')
+lines.push('export type TablesInsert<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Insert"]')
+lines.push('export type TablesUpdate<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Update"]')
+lines.push('')
+
+writeFileSync('src/types/database.ts', lines.join('\n'), 'utf8')
+console.log(`✔ تم توليد الأنواع لـ ${schema.tables.length} جدول و${seen.size} دالة → src/types/database.ts`)
