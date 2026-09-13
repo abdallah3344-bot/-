@@ -9,7 +9,7 @@
     "lint": "eslint",
     "types:gen": "node scripts/gen-types.mjs",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "node scripts/e2e/smoke.mjs && node scripts/e2e/users.mjs && node scripts/e2e/permissions.mjs && node scripts/e2e/clients.mjs && node scripts/e2e/cases.mjs && node scripts/e2e/hearings.mjs && node scripts/e2e/documents.mjs && node scripts/e2e/legal-docs.mjs"
+    "test:e2e": "node scripts/e2e/smoke.mjs && node scripts/e2e/users.mjs && node scripts/e2e/permissions.mjs && node scripts/e2e/clients.mjs && node scripts/e2e/cases.mjs && node scripts/e2e/hearings.mjs && node scripts/e2e/documents.mjs && node scripts/e2e/legal-docs.mjs && node scripts/e2e/finance.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
