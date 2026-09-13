@@ -1440,6 +1440,7 @@ export type Database = {
           poa_days_before: number
           invoice_reminder: boolean
           updated_at: string
+          last_generated_at: string | null
         }
         Insert: {
           user_id: string
@@ -1453,6 +1454,7 @@ export type Database = {
           poa_days_before?: number
           invoice_reminder?: boolean
           updated_at?: string
+          last_generated_at?: string | null
         }
         Update: {
           user_id?: string
@@ -1466,6 +1468,7 @@ export type Database = {
           poa_days_before?: number
           invoice_reminder?: boolean
           updated_at?: string
+          last_generated_at?: string | null
         }
         Relationships: [
           {
@@ -1491,6 +1494,7 @@ export type Database = {
           is_read: boolean
           read_at: string | null
           created_at: string
+          notify_date: string
         }
         Insert: {
           id?: string
@@ -1505,6 +1509,7 @@ export type Database = {
           is_read?: boolean
           read_at?: string | null
           created_at?: string
+          notify_date?: string
         }
         Update: {
           id?: string
@@ -1519,6 +1524,7 @@ export type Database = {
           is_read?: boolean
           read_at?: string | null
           created_at?: string
+          notify_date?: string
         }
         Relationships: [
           {
@@ -2251,6 +2257,10 @@ export type Database = {
         Args: Record<string, unknown>
         Returns: Json
       }
+      generate_notifications: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
       global_search: {
         Args: Record<string, unknown>
         Returns: Json
@@ -2268,6 +2278,10 @@ export type Database = {
         Returns: Json
       }
       is_super_admin: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      mark_all_notifications_read: {
         Args: Record<string, unknown>
         Returns: Json
       }

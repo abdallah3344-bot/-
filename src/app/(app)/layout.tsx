@@ -8,6 +8,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const user = await requireAuth()
   const supabase = await createClient()
 
+  // نولّد التنبيهات المستحقة قبل قراءة العدّاد ليكون رقم الترويسة صحيحًا
+  // من أول تحميل. الدالة مكبوحة في القاعدة إلى مرة كل عشر دقائق لكل مستخدم،
+  // فلا تتحوّل إلى كتابة على كل تنقّل.
+  await supabase.rpc('generate_notifications')
+
   const [{ data: settings }, { count: unreadCount }] = await Promise.all([
     supabase.from('settings').select('office_name, office_logo_url').maybeSingle(),
     supabase
