@@ -190,6 +190,52 @@ npm run test:e2e   # في أخرى
 
 ---
 
+## النشر على Netlify
+
+النظام منشور ويعمل على Netlify ضمن حساب المصري جروب:
+
+| | |
+|---|---|
+| الموقع | https://masri-law-office.netlify.app |
+| لوحة Netlify | https://app.netlify.com/projects/masri-law-office |
+| قاعدة البيانات | مشروع Supabase مستقل `Law Office` — منفصل تمامًا عن بيانات منصة المصري |
+
+### كيف يُبنى
+
+`netlify.toml` يضبط أمر البناء و Node 22 ومحرك `@netlify/plugin-nextjs`،
+وهو ما يجعل مكونات الخادم و Server Actions و `proxy.ts` تعمل داخل دوال
+Netlify بدل بناء الموقع كملفات ساكنة. رؤوس الأمان مضبوطة في
+`next.config.ts` لا في `netlify.toml`، لأن ردود Next تخرج من دالة الخادم
+ولا تمرّ على قواعد رؤوس Netlify.
+
+متغيّرا البيئة المضبوطان على الموقع:
+
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+```
+
+### نشر نسخة جديدة يدويًا
+
+```bash
+npm run build
+npx netlify deploy --prod --site masri-law-office
+```
+
+### ربط النشر التلقائي بـ GitHub
+
+النشر التلقائي عند كل `git push` غير مفعَّل بعد، ويحتاج خطوة واحدة من
+لوحة Netlify لأن ربط المستودع يمرّ بمصادقة GitHub لا يمكن إتمامها
+برمجيًا:
+
+1. افتح <https://app.netlify.com/projects/masri-law-office/configuration/deploys>
+2. اضغط **Link repository** واختر مستودع GitHub والفرع المطلوب.
+3. اترك أمر البناء ومجلّد النشر فارغَين — يقرأهما Netlify من `netlify.toml`.
+
+بعدها يبني Netlify وينشر تلقائيًا مع كل دفعة إلى الفرع المختار.
+
+---
+
 ## ما لم يُنفَّذ
 
 توخّيًا للوضوح، هذه أمور مذكورة في المواصفات لم تُنفَّذ بالكامل:
