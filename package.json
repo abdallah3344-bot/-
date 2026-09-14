@@ -10,7 +10,8 @@
     "types:gen": "node scripts/gen-types.mjs",
     "typecheck": "tsc --noEmit",
     "test:e2e": "node scripts/e2e/run-all.mjs",
-    "dev:test": "LICENSE_API_URL=http://127.0.0.1:3999 LICENSE_API_KEY=stub next dev"
+    "dev:test": "LICENSE_API_URL=http://127.0.0.1:3999 LICENSE_API_KEY=stub next dev",
+    "migrations:export": "node scripts/export-migrations.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
