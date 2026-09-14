@@ -28,6 +28,8 @@ type Props = {
     name: string
     clientType: string
     nationalId: string | null
+    workplace?: string | null
+    legalCapacity?: string | null
     phone: string | null
     whatsapp: string | null
     email: string | null
@@ -92,6 +94,18 @@ export function ClientForm({ mode, lawyers, defaults }: Props) {
                      error={err('nationalId')}>
             <Input id="nationalId" name="nationalId" dir="ltr" className="text-start"
                    defaultValue={defaults?.nationalId ?? ''} />
+          </FormField>
+
+          <FormField name="workplace" label="محل العمل" error={err('workplace')}
+                     hint="يوجب القانون ذكره في لائحة الدعوى">
+            <Input id="workplace" name="workplace" defaultValue={defaults?.workplace ?? ''} />
+          </FormField>
+
+          <FormField name="legalCapacity" label="الأهلية" error={err('legalCapacity')}
+                     hint="يُذكر عند نقص الأهلية أو انعدامها، ومن يمثّل ناقص الأهلية">
+            <Input id="legalCapacity" name="legalCapacity"
+                   defaultValue={defaults?.legalCapacity ?? ''}
+                   placeholder="كامل الأهلية" />
           </FormField>
 
           <FormField name="occupation" label="المهنة / النشاط" error={err('occupation')}>

@@ -11,6 +11,8 @@ export type ClientRow = {
   name: string
   client_type: string
   national_id: string | null
+  workplace?: string | null
+  legal_capacity?: string | null
   phone: string | null
   whatsapp: string | null
   email: string | null
@@ -66,7 +68,7 @@ export async function getClient(id: string) {
   const { data, error } = await supabase
     .from('clients')
     .select(
-      'id, client_no, name, client_type, national_id, phone, whatsapp, email, address, occupation, file_opened_at, responsible_lawyer_id, status, notes, created_at, updated_at, profiles:responsible_lawyer_id(id, full_name)',
+      'id, client_no, name, client_type, national_id, workplace, legal_capacity, phone, whatsapp, email, address, occupation, file_opened_at, responsible_lawyer_id, status, notes, created_at, updated_at, profiles:responsible_lawyer_id(id, full_name)',
     )
     .eq('id', id)
     .is('deleted_at', null)

@@ -10,7 +10,7 @@ const USER = process.env.E2E_USER ?? 'admin'
 const PASS = process.env.E2E_PASS ?? 'Admin@2026'
 
 /** المسارات التي يُتوقَّع وجودها. تُضاف مع كل مرحلة. */
-const MODULE_ROUTES = (process.env.E2E_ROUTES ?? '/dashboard,/clients,/cases,/hearings,/calendar,/tasks,/documents,/powers-of-attorney,/contracts,/fees,/invoices,/payments,/expenses,/accounts,/reports,/correspondence,/notifications,/archive,/staff,/settings,/audit-log,/users,/profile').split(',').filter(Boolean)
+const MODULE_ROUTES = (process.env.E2E_ROUTES ?? '/dashboard,/clients,/cases,/hearings,/calendar,/tasks,/documents,/templates,/powers-of-attorney,/contracts,/fees,/invoices,/payments,/expenses,/accounts,/reports,/correspondence,/notifications,/archive,/staff,/settings,/audit-log,/users,/profile').split(',').filter(Boolean)
 
 const results = []
 const consoleErrors = []
@@ -73,7 +73,11 @@ try {
 
   // 6) القائمة الجانبية تحتوي كل الوحدات
   const navLinks = await page.$$eval('aside nav a', (els) => els.map((e) => e.textContent?.trim()))
-  check('القائمة الجانبية تعرض 22 وحدة', navLinks.length === 22, `العدد: ${navLinks.length}`)
+  // العدد مشتق من NAVIGATION: يتغيّر مع كل وحدة تُضاف، فنقارنه بالمسارات
+  // التي يفحصها هذا الاختبار بدل رقم ثابت يتقادم.
+  const expectedModules = MODULE_ROUTES.filter((r) => r !== '/profile').length
+  check(`القائمة الجانبية تعرض ${expectedModules} وحدة`,
+    navLinks.length === expectedModules, `العدد: ${navLinks.length}`)
 
   // 7) التنقل بين الصفحات يعمل
   const built = []

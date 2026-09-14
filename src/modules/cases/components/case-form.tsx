@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select'
 import { GOVERNORATE_GROUPS } from '@/lib/constants/palestine'
 import { FormField, FormError } from '@/components/shared/form-field'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import {
   CASE_STATUSES, CASE_STATUS_LABELS, PRIORITIES, PRIORITY_LABELS,
   LITIGATION_DEGREES, LITIGATION_DEGREE_LABELS,
@@ -266,6 +266,37 @@ export function CaseForm({ mode, options, defaultClientId, defaults }: Props) {
 
           <FormField name="notes" label="ملاحظات" error={err('notes')} className="sm:col-span-2">
             <Textarea id="notes" name="notes" rows={3} defaultValue={defaults?.notes ?? ''} />
+          </FormField>
+        </CardContent>
+      </Card>
+
+      {/* بيانات يوجبها القانون في لائحة الدعوى — يفحص تبويب «لائحة الدعوى» اكتمالها */}
+      <Card>
+        <CardHeader>
+          <CardTitle>بيانات لائحة الدعوى</CardTitle>
+          <CardDescription>
+            بيانات توجبها المادة 52 من قانون أصول المحاكمات المدنية والتجارية.
+            تُملأ عند رفع الدعوى وتظهر جاهزيتها في ملف القضية.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-5 sm:grid-cols-2">
+          <FormField name="claimAroseAt" label="تاريخ نشوء الادعاء" error={err('claimAroseAt')}>
+            <Input id="claimAroseAt" name="claimAroseAt" type="date"
+                   defaultValue={defaults?.claimAroseAt ?? ''} />
+          </FormField>
+
+          <FormField name="claimRequests" label="طلبات المدعي" error={err('claimRequests')}
+                     className="sm:col-span-2">
+            <Textarea id="claimRequests" name="claimRequests" rows={4}
+                      defaultValue={defaults?.claimRequests ?? ''}
+                      placeholder="ما يُطلب من المحكمة الحكم به" />
+          </FormField>
+
+          <FormField name="propertyDescription" label="وصف العقار أو المنقول"
+                     error={err('propertyDescription')} className="sm:col-span-2"
+                     hint="إن كان موضوع الدعوى عينًا معيّنة — وصف يميّزها عن غيرها">
+            <Textarea id="propertyDescription" name="propertyDescription" rows={3}
+                      defaultValue={defaults?.propertyDescription ?? ''} />
           </FormField>
         </CardContent>
       </Card>

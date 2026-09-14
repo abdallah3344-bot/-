@@ -33,6 +33,9 @@ function toDefaults(row: Record<string, unknown>): Record<string, string | null>
     status: text('status'),
     description: text('description'),
     notes: text('notes'),
+    claimRequests: text('claim_requests'),
+    claimAroseAt: text('claim_arose_at'),
+    propertyDescription: text('property_description'),
   }
 }
 

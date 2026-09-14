@@ -84,6 +84,7 @@ export async function getCase(id: string) {
       id, internal_no, court_case_no, title, client_id, status, priority,
       registered_at, first_hearing_at, claim_amount, governorate, litigation_degree,
       description, notes, closed_at, close_reason, archived_at, created_at,
+      claim_requests, claim_arose_at, property_description,
       responsible_lawyer_id, assistant_lawyer_id, case_type_id, court_id, chamber_id, judge_id,
       clients:client_id(id, name, client_no, phone),
       case_types:case_type_id(id, name_ar, color),
@@ -105,7 +106,7 @@ export async function listOpponents(caseId: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('opponents')
-    .select('id, name, national_id, phone, address, lawyer_name, lawyer_phone, notes')
+    .select('id, name, national_id, occupation, workplace, legal_capacity, phone, address, lawyer_name, lawyer_phone, notes')
     .eq('case_id', caseId)
     .order('created_at')
 

@@ -30,6 +30,8 @@ export default async function EditClientPage({
             name: client.name,
             clientType: client.client_type,
             nationalId: client.national_id,
+            workplace: client.workplace,
+            legalCapacity: client.legal_capacity,
             phone: client.phone,
             whatsapp: client.whatsapp,
             email: client.email,

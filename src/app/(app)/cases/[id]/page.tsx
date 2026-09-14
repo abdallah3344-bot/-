@@ -11,6 +11,12 @@ import { PrintButton } from '@/components/shared/print-button'
 import { OpponentsPanel, type Opponent } from '@/modules/cases/components/opponents-panel'
 import { CaseNotesPanel } from '@/modules/cases/components/case-notes-panel'
 import { CaseHeaderActions } from '@/modules/cases/components/case-header-actions'
+import { ClaimReadiness } from '@/modules/templates/components/claim-readiness'
+import { GeneratePanel } from '@/modules/templates/components/generate-panel'
+import { MizanSheet } from '@/modules/templates/components/mizan-sheet'
+import { checkClaimData } from '@/modules/templates/claim-check'
+import { listTemplates } from '@/modules/templates/queries'
+import { buildMizanSheet } from '@/modules/templates/mizan'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -85,6 +91,11 @@ export default async function CaseWorkspacePage({
   const expenses = expensesRes.data ?? []
   const notes = notesRes.data ?? []
   const history = historyRes.data ?? []
+
+  // تبويب لائحة الدعوى: يُحمَّل فقط لمن يرى المستندات
+  const [claimCheck, templates, mizanSheet] = can.can('documents', 'view')
+    ? await Promise.all([checkClaimData(id), listTemplates(), buildMizanSheet(id)])
+    : [null, [], []]
 
   const status = String(row.status)
   const isClosed = status === 'closed' || status === 'archived'
@@ -179,6 +190,9 @@ export default async function CaseWorkspacePage({
           ) : null}
           {can.can('expenses', 'view') ? (
             <TabsTrigger value="expenses">المصروفات ({counts.expenses})</TabsTrigger>
+          ) : null}
+          {can.can('documents', 'view') ? (
+            <TabsTrigger value="claim">لائحة الدعوى</TabsTrigger>
           ) : null}
           <TabsTrigger value="notes">الملاحظات ({notes.length})</TabsTrigger>
           <TabsTrigger value="history">سجل الحالة</TabsTrigger>
@@ -452,6 +466,32 @@ export default async function CaseWorkspacePage({
         ) : null}
 
         {/* الملاحظات */}
+        {/* لائحة الدعوى: جاهزية البيانات، توليد المستندات، ورقة ميزان */}
+        {can.can('documents', 'view') ? (
+          <TabsContent value="claim">
+            <div className="space-y-4">
+              {claimCheck ? <ClaimReadiness check={claimCheck} /> : null}
+
+              {can.can('documents', 'create') ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">توليد مستند من قالب</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <GeneratePanel templates={templates} caseId={id} />
+                  </CardContent>
+                </Card>
+              ) : null}
+
+              <MizanSheet
+                sections={mizanSheet}
+                caseId={id}
+                canExport={can.can('cases', 'export')}
+              />
+            </div>
+          </TabsContent>
+        ) : null}
+
         <TabsContent value="notes">
           <CaseNotesPanel
             caseId={id}

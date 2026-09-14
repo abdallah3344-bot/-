@@ -25,6 +25,9 @@ export type Opponent = {
   national_id: string | null
   phone: string | null
   address: string | null
+  occupation?: string | null
+  workplace?: string | null
+  legal_capacity?: string | null
   lawyer_name: string | null
   lawyer_phone: string | null
   notes: string | null
@@ -118,6 +121,9 @@ export function OpponentsPanel({ caseId, opponents, canEdit }: Props) {
                     items={[
                       { label: 'رقم الهوية', value: opponent.national_id, ltr: true },
                       { label: 'الهاتف', value: opponent.phone, ltr: true },
+                      { label: 'الصفة / المهنة', value: opponent.occupation ?? null },
+                      { label: 'محل العمل', value: opponent.workplace ?? null },
+                      { label: 'الأهلية', value: opponent.legal_capacity ?? null },
                       { label: 'العنوان', value: opponent.address, full: true },
                       { label: 'محامي الخصم', value: opponent.lawyer_name },
                       { label: 'هاتف المحامي', value: opponent.lawyer_phone, ltr: true },
@@ -160,6 +166,19 @@ export function OpponentsPanel({ caseId, opponents, canEdit }: Props) {
               <FormField name="phone" label="الهاتف" error={err('phone')}>
                 <Input id="phone" name="phone" dir="ltr" className="text-start"
                        defaultValue={editing?.phone ?? ''} />
+              </FormField>
+
+              <FormField name="occupation" label="الصفة / المهنة" error={err('occupation')}>
+                <Input id="occupation" name="occupation" defaultValue={editing?.occupation ?? ''} />
+              </FormField>
+
+              <FormField name="workplace" label="محل العمل" error={err('workplace')}>
+                <Input id="workplace" name="workplace" defaultValue={editing?.workplace ?? ''} />
+              </FormField>
+
+              <FormField name="legalCapacity" label="الأهلية" error={err('legalCapacity')}>
+                <Input id="legalCapacity" name="legalCapacity"
+                       defaultValue={editing?.legal_capacity ?? ''} placeholder="كامل الأهلية" />
               </FormField>
 
               <FormField name="address" label="العنوان" error={err('address')}

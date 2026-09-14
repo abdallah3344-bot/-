@@ -384,6 +384,9 @@ export type Database = {
           updated_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          claim_requests: string | null
+          claim_arose_at: string | null
+          property_description: string | null
         }
         Insert: {
           id?: string
@@ -415,6 +418,9 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          claim_requests?: string | null
+          claim_arose_at?: string | null
+          property_description?: string | null
         }
         Update: {
           id?: string
@@ -446,6 +452,9 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          claim_requests?: string | null
+          claim_arose_at?: string | null
+          property_description?: string | null
         }
         Relationships: [
           {
@@ -535,6 +544,8 @@ export type Database = {
           updated_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          workplace: string | null
+          legal_capacity: string | null
         }
         Insert: {
           id?: string
@@ -557,6 +568,8 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          workplace?: string | null
+          legal_capacity?: string | null
         }
         Update: {
           id?: string
@@ -579,6 +592,8 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          workplace?: string | null
+          legal_capacity?: string | null
         }
         Relationships: [
           {
@@ -889,6 +904,82 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      document_templates: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          scope: string
+          category_id: string | null
+          body: string | null
+          file_path: string | null
+          file_name: string | null
+          is_active: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+          created_by: string | null
+          updated_by: string | null
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          scope?: string
+          category_id?: string | null
+          body?: string | null
+          file_path?: string | null
+          file_name?: string | null
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          scope?: string
+          category_id?: string | null
+          body?: string | null
+          file_path?: string | null
+          file_name?: string | null
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "document_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
@@ -1643,6 +1734,9 @@ export type Database = {
           created_at: string
           updated_at: string
           is_demo: boolean
+          occupation: string | null
+          workplace: string | null
+          legal_capacity: string | null
         }
         Insert: {
           id?: string
@@ -1658,6 +1752,9 @@ export type Database = {
           created_at?: string
           updated_at?: string
           is_demo?: boolean
+          occupation?: string | null
+          workplace?: string | null
+          legal_capacity?: string | null
         }
         Update: {
           id?: string
@@ -1673,6 +1770,9 @@ export type Database = {
           created_at?: string
           updated_at?: string
           is_demo?: boolean
+          occupation?: string | null
+          workplace?: string | null
+          legal_capacity?: string | null
         }
         Relationships: [
           {
@@ -2340,6 +2440,10 @@ export type Database = {
         Returns: Json
       }
       dashboard_stats: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      export_migrations: {
         Args: Record<string, unknown>
         Returns: Json
       }

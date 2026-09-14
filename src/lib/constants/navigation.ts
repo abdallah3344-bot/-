@@ -23,6 +23,7 @@ export const NAVIGATION: NavItem[] = [
   { href: '/tasks',              label: 'المهام',               icon: 'ListChecks',      module: 'tasks',          group: 'work' },
   { href: '/documents',          label: 'المستندات',            icon: 'FolderOpen',      module: 'documents',      group: 'work' },
   { href: '/powers-of-attorney', label: 'الوكالات',             icon: 'ScrollText',      module: 'poa',            group: 'work' },
+  { href: '/templates',          label: 'قوالب المستندات',      icon: 'FileStack',       module: 'documents',      group: 'work' },
   { href: '/contracts',          label: 'العقود',               icon: 'FileSignature',   module: 'contracts',      group: 'work' },
 
   { href: '/fees',               label: 'أتعاب المحاماة',       icon: 'Banknote',        module: 'fees',           group: 'finance' },

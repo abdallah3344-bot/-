@@ -7,6 +7,8 @@ export const clientSchema = z.object({
   name: z.string().trim().min(2, 'اسم العميل مطلوب (حرفان على الأقل)'),
   clientType: z.enum(CLIENT_TYPES, { message: 'اختر نوع العميل' }),
   nationalId: optionalText,
+  workplace: optionalText,
+  legalCapacity: optionalText,
   phone: optionalText,
   whatsapp: optionalText,
   email: z

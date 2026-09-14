@@ -27,6 +27,8 @@ function readForm(formData: FormData) {
     name: formData.get('name'),
     clientType: formData.get('clientType'),
     nationalId: formData.get('nationalId'),
+    workplace: formData.get('workplace'),
+    legalCapacity: formData.get('legalCapacity'),
     phone: formData.get('phone'),
     whatsapp: formData.get('whatsapp'),
     email: formData.get('email'),
@@ -42,6 +44,7 @@ function readForm(formData: FormData) {
 /** يحوّل مدخلات النموذج إلى صف قاعدة البيانات. */
 function toRow(input: {
   name: string; clientType: string; nationalId?: string; phone?: string
+  workplace?: string; legalCapacity?: string
   whatsapp?: string; email?: string; address?: string; occupation?: string
   fileOpenedAt: string; responsibleLawyerId?: string; status: string; notes?: string
 }) {
@@ -49,6 +52,8 @@ function toRow(input: {
     name: input.name,
     client_type: input.clientType,
     national_id: input.nationalId || null,
+    workplace: input.workplace || null,
+    legal_capacity: input.legalCapacity || null,
     phone: input.phone || null,
     whatsapp: input.whatsapp || null,
     email: input.email || null,

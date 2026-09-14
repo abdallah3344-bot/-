@@ -10,7 +10,7 @@ import { startLicenseStub } from './license-stub.mjs'
 
 const SUITES = [
   'smoke', 'users', 'permissions', 'clients', 'cases', 'hearings',
-  'documents', 'legal-docs', 'finance', 'reports', 'comms', 'admin', 'license',
+  'documents', 'legal-docs', 'finance', 'reports', 'comms', 'admin', 'license', 'legal-tools',
 ]
 
 const only = process.argv.slice(2).filter((a) => !a.startsWith('-'))

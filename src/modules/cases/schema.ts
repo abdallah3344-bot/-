@@ -34,6 +34,10 @@ export const caseSchema = z.object({
   status: z.enum(CASE_STATUSES, { message: 'اختر الحالة' }),
   description: optionalText,
   notes: optionalText,
+  // بيانات لائحة الدعوى (المادة 52) — حقول مستقلة ليمكن فحص اكتمالها
+  claimRequests: optionalText,
+  claimAroseAt: optionalDate,
+  propertyDescription: optionalText,
 })
 
 export const createCaseSchema = caseSchema
@@ -43,6 +47,9 @@ export const opponentSchema = z.object({
   caseId: z.string().uuid(),
   name: z.string().trim().min(2, 'اسم الخصم مطلوب'),
   nationalId: optionalText,
+  occupation: optionalText,
+  workplace: optionalText,
+  legalCapacity: optionalText,
   phone: optionalText,
   address: optionalText,
   lawyerName: optionalText,

@@ -36,6 +36,9 @@ function readForm(formData: FormData) {
     chamberId: nullable(formData.get('chamberId')),
     judgeId: nullable(formData.get('judgeId')),
     governorate: formData.get('governorate'),
+    claimRequests: formData.get('claimRequests'),
+    claimAroseAt: formData.get('claimAroseAt'),
+    propertyDescription: formData.get('propertyDescription'),
     registeredAt: formData.get('registeredAt'),
     firstHearingAt: formData.get('firstHearingAt'),
     litigationDegree: nullable(formData.get('litigationDegree')),
@@ -51,6 +54,7 @@ type CaseFields = {
   title: string; clientId: string; courtCaseNo?: string
   responsibleLawyerId?: string; assistantLawyerId?: string; caseTypeId?: string
   courtId?: string; chamberId?: string; judgeId?: string; governorate?: string
+  claimRequests?: string; claimAroseAt?: string; propertyDescription?: string
   registeredAt?: string; firstHearingAt?: string; litigationDegree?: string
   claimAmount?: string; priority: string; status: string
   description?: string; notes?: string
@@ -68,6 +72,9 @@ function toRow(input: CaseFields) {
     chamber_id: input.chamberId || null,
     judge_id: input.judgeId || null,
     governorate: input.governorate || null,
+    claim_requests: input.claimRequests || null,
+    claim_arose_at: input.claimAroseAt || null,
+    property_description: input.propertyDescription || null,
     registered_at: input.registeredAt || null,
     first_hearing_at: input.firstHearingAt || null,
     litigation_degree: input.litigationDegree || null,
@@ -263,6 +270,9 @@ export async function saveOpponentAction(
     caseId: formData.get('caseId'),
     name: formData.get('name'),
     nationalId: formData.get('nationalId'),
+    occupation: formData.get('occupation'),
+    workplace: formData.get('workplace'),
+    legalCapacity: formData.get('legalCapacity'),
     phone: formData.get('phone'),
     address: formData.get('address'),
     lawyerName: formData.get('lawyerName'),
@@ -286,6 +296,9 @@ export async function saveOpponentAction(
     case_id: input.caseId,
     name: input.name,
     national_id: input.nationalId || null,
+    occupation: input.occupation || null,
+    workplace: input.workplace || null,
+    legal_capacity: input.legalCapacity || null,
     phone: input.phone || null,
     address: input.address || null,
     lawyer_name: input.lawyerName || null,
