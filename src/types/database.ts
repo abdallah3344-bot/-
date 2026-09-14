@@ -1451,6 +1451,59 @@ export type Database = {
           },
         ]
       }
+      license_state: {
+        Row: {
+          id: boolean
+          program: string
+          device_id: string
+          license_key: string | null
+          client_name: string | null
+          phone: string | null
+          activated_at: string | null
+          activated_by: string | null
+          last_state: string | null
+          last_message: string | null
+          last_verified_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          program?: string
+          device_id?: string
+          license_key?: string | null
+          client_name?: string | null
+          phone?: string | null
+          activated_at?: string | null
+          activated_by?: string | null
+          last_state?: string | null
+          last_message?: string | null
+          last_verified_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          program?: string
+          device_id?: string
+          license_key?: string | null
+          client_name?: string | null
+          phone?: string | null
+          activated_at?: string | null
+          activated_by?: string | null
+          last_state?: string | null
+          last_message?: string | null
+          last_verified_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_state_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           user_id: string
@@ -2343,6 +2396,10 @@ export type Database = {
         Returns: undefined
       }
       soft_delete: {
+        Args: Record<string, unknown>
+        Returns: undefined
+      }
+      touch_license_state: {
         Args: Record<string, unknown>
         Returns: undefined
       }

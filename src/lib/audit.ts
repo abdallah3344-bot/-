@@ -7,6 +7,7 @@ type AuditAction =
   | 'login' | 'logout' | 'login_failed' | 'create' | 'update' | 'delete' | 'restore'
   | 'upload' | 'download' | 'print' | 'export' | 'permission_change'
   | 'password_change' | 'approve' | 'close' | 'reopen' | 'backup' | 'restore_backup'
+  | 'license_activate' | 'license_trial_request'
 
 type AuditEntry = {
   action: AuditAction

@@ -1,11 +1,20 @@
+import { redirect } from 'next/navigation'
 import { requireAuth } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import { AppShell } from '@/components/layout/app-shell'
 import { NAVIGATION } from '@/lib/constants/navigation'
+import { getLicenseStatus } from '@/modules/license/service'
+import { LicenseBanner } from '@/modules/license/components/license-banner'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   // الطبقة الثانية: لا شيء يُصيَّر قبل التحقق من الجلسة.
   const user = await requireAuth()
+
+  // بوابة الترخيص: لا يُصيَّر أي شيء من النظام بلا ترخيص سارٍ.
+  // التحقق يسأل خادم التراخيص مباشرة، فلا يُزوَّر بالكتابة في جدول.
+  const license = await getLicenseStatus()
+  if (!license.allowed) redirect('/activation')
+
   const supabase = await createClient()
 
   // نولّد التنبيهات المستحقة قبل قراءة العدّاد ليكون رقم الترويسة صحيحًا
@@ -39,6 +48,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       canSearch={user.permissions.canAccessModule('clients') || user.permissions.canAccessModule('cases')}
       unreadCount={unreadCount ?? 0}
     >
+      <LicenseBanner status={license} />
       {children}
     </AppShell>
   )

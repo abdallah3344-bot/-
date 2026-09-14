@@ -9,6 +9,8 @@ import { LookupManager } from '@/modules/settings/components/lookup-manager'
 import { BackupPanel } from '@/modules/settings/components/backup-panel'
 import { DemoDataPanel } from '@/modules/settings/components/demo-data-panel'
 import { Card, CardContent } from '@/components/ui/card'
+import { getLicenseStatus } from '@/modules/license/service'
+import { LicenseCard } from '@/modules/license/components/license-card'
 
 export const metadata: Metadata = { title: 'الإعدادات' }
 
@@ -27,6 +29,7 @@ export default async function SettingsPage() {
   ])
 
   const settings = (settingsRes.data ?? {}) as Record<string, unknown>
+  const license = await getLicenseStatus()
 
   return (
     <>
@@ -40,6 +43,7 @@ export default async function SettingsPage() {
           <TabsTrigger value="office">بيانات المكتب</TabsTrigger>
           <TabsTrigger value="lookups">جداول المراجع</TabsTrigger>
           <TabsTrigger value="backup">النسخ الاحتياطي</TabsTrigger>
+          <TabsTrigger value="license">الترخيص</TabsTrigger>
         </TabsList>
 
         <TabsContent value="office">
@@ -92,6 +96,12 @@ export default async function SettingsPage() {
           <div className="max-w-2xl space-y-4">
             <BackupPanel frequency={String(settings.backup_frequency ?? 'daily')} />
             {canEdit ? <DemoDataPanel demoCount={demoRes.count ?? 0} /> : null}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="license">
+          <div className="max-w-3xl">
+            <LicenseCard status={license} />
           </div>
         </TabsContent>
       </Tabs>
