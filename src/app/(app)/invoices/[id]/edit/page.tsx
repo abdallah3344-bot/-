@@ -5,6 +5,7 @@ import { getInvoice } from '@/modules/finance/queries'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/shared/page-header'
 import { InvoiceForm } from '@/modules/finance/components/invoice-form'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'تعديل الفاتورة' }
 
@@ -34,7 +35,7 @@ export default async function EditInvoicePage({
           options={{ clients: clientsRes.data ?? [], cases: casesRes.data ?? [] }}
           defaultTaxRate={Number(settings?.tax_rate ?? 0)}
           taxEnabled={Boolean(settings?.tax_enabled)}
-          currencySymbol={String(settings?.currency_symbol ?? 'ر.س')}
+          currencySymbol={currencySymbol(settings?.currency_code as string | null)}
           defaults={{
             id: String(invoice.id),
             clientId: String(invoice.client_id),

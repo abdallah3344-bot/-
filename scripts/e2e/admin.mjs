@@ -54,14 +54,35 @@ try {
   // ---------- الإعدادات: بيانات المكتب ----------
   await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle' })
   await page.fill('#officeName', `مكتب المحاماة ${stamp}`)
-  await page.fill('#officePhone', '0112345678')
-  await page.fill('#currencySymbol', 'ر.س')
+  await page.fill('#officePhone', '0599123456')
   await page.click('button[type=submit]:has-text("حفظ الإعدادات")')
   await page.waitForTimeout(3500)
 
   await page.reload({ waitUntil: 'networkidle' })
   const savedName = await page.inputValue('#officeName')
   check('حفظ بيانات المكتب', savedName === `مكتب المحاماة ${stamp}`, savedName)
+
+  // ---------- الإعدادات: العملة ----------
+  // العملة تُختار من قائمة، ورمزها وتفقيطها يُشتقّان منها في الخادم.
+  const currencyTrigger = page.locator('#currencyCode')
+  check('العملة قائمة اختيار لا حقلًا حرًّا', await currencyTrigger.count() === 1)
+  check('العملة المضبوطة هي الشيكل',
+    ((await currencyTrigger.textContent()) ?? '').includes('شيكل'))
+
+  await currencyTrigger.click()
+  const currencyOptions = (await page.locator('[role=option]').allTextContents()).join(' | ')
+  for (const name of ['شيكل', 'دينار', 'دولار', 'يورو']) {
+    check(`العملة «${name}» متاحة في القائمة`, currencyOptions.includes(name), '')
+  }
+  await page.keyboard.press('Escape')
+
+  // رمز العملة ينعكس على المبالغ في الشاشات المالية
+  await page.goto(`${BASE}/invoices`, { waitUntil: 'networkidle' })
+  const invoicesBody = (await page.textContent('body')) ?? ''
+  check('رمز الشيكل يظهر بجانب المبالغ', invoicesBody.includes('₪'))
+  check('لم يبقَ رمز العملة القديم', !invoicesBody.includes('ر.س'))
+
+  await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle' })
 
   // اسم المكتب ينعكس في الشريط الجانبي
   const sidebarText = await page.textContent('aside')

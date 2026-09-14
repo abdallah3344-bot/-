@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { checkPermission } from '@/lib/auth/session'
 import { logAudit, diffChanges } from '@/lib/audit'
 import type { ActionResult } from '@/modules/auth/actions'
+import { CURRENCY_CODES, currencySymbol } from '@/lib/constants/currencies'
 
 const optionalText = z.string().trim().optional().or(z.literal(''))
 
@@ -18,8 +19,11 @@ const settingsSchema = z.object({
     .refine((v) => !v || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v), 'صيغة البريد غير صحيحة'),
   officeWebsite: optionalText,
   taxNumber: optionalText,
-  currencyCode: z.string().trim().min(2, 'رمز العملة مطلوب').max(5),
-  currencySymbol: z.string().trim().min(1, 'رمز العرض مطلوب').max(8),
+  // العملة تُختار من قائمة معروفة: رمز العرض وصيغ التفقيط تُشتق منها
+  // في الخادم، فلا يصل رمز حر من المتصفح إلى الفواتير والإيصالات.
+  currencyCode: z.enum(CURRENCY_CODES as [string, ...string[]], {
+    message: 'اختر عملة من القائمة',
+  }),
   taxEnabled: z.boolean(),
   taxRate: z.coerce.number().min(0, 'النسبة لا تقل عن صفر').max(100, 'النسبة لا تتجاوز 100'),
   invoicePrefix: z.string().trim().min(1).max(10),
@@ -49,7 +53,6 @@ export async function saveSettingsAction(
     officeWebsite: formData.get('officeWebsite'),
     taxNumber: formData.get('taxNumber'),
     currencyCode: formData.get('currencyCode'),
-    currencySymbol: formData.get('currencySymbol'),
     taxEnabled: formData.get('taxEnabled') === 'on' || formData.get('taxEnabled') === 'true',
     taxRate: formData.get('taxRate') || 0,
     invoicePrefix: formData.get('invoicePrefix'),
@@ -89,7 +92,8 @@ export async function saveSettingsAction(
     office_website: input.officeWebsite || null,
     tax_number: input.taxNumber || null,
     currency_code: input.currencyCode,
-    currency_symbol: input.currencySymbol,
+    // يُشتق من رمز العملة ولا يُقرأ من النموذج
+    currency_symbol: currencySymbol(input.currencyCode),
     tax_enabled: input.taxEnabled,
     tax_rate: input.taxRate,
     invoice_prefix: input.invoicePrefix,

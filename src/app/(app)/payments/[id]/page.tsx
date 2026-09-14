@@ -6,61 +6,14 @@ import { getPaymentReceipt } from '@/modules/finance/queries'
 import { PageHeader } from '@/components/shared/page-header'
 import { PrintButton } from '@/components/shared/print-button'
 import { formatDate, formatMoney } from '@/lib/utils'
+import { amountInWords } from '@/lib/money'
+import { currencySymbol } from '@/lib/constants/currencies'
 import { PAYMENT_METHOD_LABELS, labelOf } from '@/lib/constants/enums'
 
 export const metadata: Metadata = { title: 'إيصال قبض' }
 
 function text(value: unknown): string {
   return value === null || value === undefined ? '' : String(value)
-}
-
-/** تحويل المبلغ إلى كلمات عربية — يمنع التلاعب بالرقم في الإيصال الورقي. */
-function amountInWords(amount: number): string {
-  const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة',
-                'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر',
-                'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر']
-  const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون']
-  const hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة',
-                    'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة']
-
-  function underThousand(n: number): string {
-    if (n === 0) return ''
-    const parts: string[] = []
-    const h = Math.floor(n / 100)
-    const rest = n % 100
-    if (h > 0) parts.push(hundreds[h])
-    if (rest > 0) {
-      if (rest < 20) parts.push(ones[rest])
-      else {
-        const unit = rest % 10
-        const ten = Math.floor(rest / 10)
-        parts.push(unit > 0 ? `${ones[unit]} و${tens[ten]}` : tens[ten])
-      }
-    }
-    return parts.join(' و')
-  }
-
-  const whole = Math.floor(Math.abs(amount))
-  if (whole === 0) return 'صفر'
-
-  const groups: string[] = []
-  const millions = Math.floor(whole / 1_000_000)
-  const thousands = Math.floor((whole % 1_000_000) / 1000)
-  const rest = whole % 1000
-
-  // تمييز العدد في العربية: 3-10 جمع قلّة، و11 فأكثر مفرد منصوب.
-  function countOf(n: number, singular: string, dual: string, plural: string): string {
-    if (n === 1) return singular
-    if (n === 2) return dual
-    if (n >= 3 && n <= 10) return `${underThousand(n)} ${plural}`
-    return `${underThousand(n)} ${singular}`
-  }
-
-  if (millions > 0) groups.push(countOf(millions, 'مليون', 'مليونان', 'ملايين'))
-  if (thousands > 0) groups.push(countOf(thousands, 'ألف', 'ألفان', 'آلاف'))
-  if (rest > 0) groups.push(underThousand(rest))
-
-  return groups.join(' و')
 }
 
 export default async function ReceiptPage({
@@ -78,7 +31,8 @@ export default async function ReceiptPage({
   const relatedCase = payment.cases as Record<string, unknown> | null
   const invoice = payment.invoices as Record<string, unknown> | null
   const receiver = payment.receiver as Record<string, unknown> | null
-  const symbol = text(settings?.currency_symbol) || 'ر.س'
+  const currencyCode = text(settings?.currency_code) || undefined
+  const symbol = currencySymbol(currencyCode)
   const amount = Number(payment.amount ?? 0)
 
   return (
@@ -136,7 +90,7 @@ export default async function ReceiptPage({
 
             <p className="rounded-lg bg-surface-muted p-3">
               <span className="text-muted-foreground">فقط: </span>
-              <strong>{amountInWords(amount)} {symbol} لا غير</strong>
+              <strong>{amountInWords(amount, currencyCode)} لا غير</strong>
             </p>
 
             <p className="flex flex-wrap gap-2">

@@ -10,6 +10,7 @@ import { PrintButton } from '@/components/shared/print-button'
 import { ContractsView } from '@/modules/legal-docs/components/contracts-view'
 import type { SearchParams } from '@/lib/query'
 import { CONTRACT_STATUSES, CONTRACT_STATUS_LABELS } from '@/lib/constants/enums'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'العقود' }
 
@@ -26,10 +27,10 @@ export default async function ContractsPage({
     listContracts(params),
     getLegalDocOptions(),
     getExpiringCounts(),
-    supabase.from('settings').select('currency_symbol').maybeSingle(),
+    supabase.from('settings').select('currency_code').maybeSingle(),
   ])
 
-  const currencySymbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
 
   return (
     <>
@@ -66,7 +67,7 @@ export default async function ContractsPage({
       />
 
       <ContractsView
-        rows={rows} options={options} currencySymbol={currencySymbol}
+        rows={rows} options={options} currencySymbol={symbol}
         canCreate={user.permissions.can('contracts', 'create')}
         canUpdate={user.permissions.can('contracts', 'update')}
         canDelete={user.permissions.can('contracts', 'delete')}

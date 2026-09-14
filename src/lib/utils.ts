@@ -1,12 +1,16 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { currencySymbol } from '@/lib/constants/currencies'
+
+/** رمز العملة الافتراضية — يُستعمل حين لا تُمرَّر عملة المكتب. */
+const DEFAULT_SYMBOL = currencySymbol(null)
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
 /** تنسيق مبلغ مالي بالعملة المضبوطة في الإعدادات. */
-export function formatMoney(amount: number | string | null | undefined, symbol = 'ر.س') {
+export function formatMoney(amount: number | string | null | undefined, symbol = DEFAULT_SYMBOL) {
   const n = typeof amount === 'string' ? Number(amount) : (amount ?? 0)
   if (!Number.isFinite(n)) return `0.00 ${symbol}`
   return `${n.toLocaleString('en-US', {

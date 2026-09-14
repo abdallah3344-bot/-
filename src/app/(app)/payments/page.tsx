@@ -10,6 +10,7 @@ import { PaymentsView } from '@/modules/finance/components/payments-view'
 import { formatMoney } from '@/lib/utils'
 import type { SearchParams } from '@/lib/query'
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from '@/lib/constants/enums'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'المقبوضات' }
 
@@ -32,10 +33,10 @@ export default async function PaymentsPage({
         .is('deleted_at', null).not('status', 'in', '("paid","cancelled")')
         .order('issue_date', { ascending: false }).limit(500),
       supabase.from('accounts').select('id, name').is('deleted_at', null).eq('is_active', true),
-      supabase.from('settings').select('currency_symbol').maybeSingle(),
+      supabase.from('settings').select('currency_code').maybeSingle(),
     ])
 
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
   const sum = rows.reduce((s, r) => s + Number(r.amount ?? 0), 0)
 
   return (

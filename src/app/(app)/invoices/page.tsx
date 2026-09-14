@@ -16,6 +16,7 @@ import { formatDate, formatMoney } from '@/lib/utils'
 import type { SearchParams } from '@/lib/query'
 import { INVOICE_STATUSES, INVOICE_STATUS_LABELS, INVOICE_STATUS_TONE, labelOf, toneOf }
   from '@/lib/constants/enums'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'الفواتير' }
 
@@ -32,10 +33,10 @@ export default async function InvoicesPage({
     listInvoices(params),
     getFinanceSummary(),
     supabase.from('clients').select('id, name').is('deleted_at', null).order('name').limit(500),
-    supabase.from('settings').select('currency_symbol').maybeSingle(),
+    supabase.from('settings').select('currency_code').maybeSingle(),
   ])
 
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
   const canCreate = user.permissions.can('invoices', 'create')
 
   const columns: Column<InvoiceRow>[] = [

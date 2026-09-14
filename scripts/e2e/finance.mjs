@@ -193,7 +193,12 @@ try {
     const receiptBody = await page.textContent('body')
     check('إيصال القبض يعرض المبلغ بالكلمات',
           Boolean(receiptBody?.includes('فقط:') && receiptBody?.includes('لا غير')),
-          receiptBody?.match(/فقط: (.{0,40})/)?.[1])
+          receiptBody?.match(/فقط: (.{0,60})/)?.[1])
+    // التفقيط يذكر اسم العملة لا رمزها: «... شيكلًا لا غير»
+    check('التفقيط يذكر اسم العملة المضبوطة',
+          /شيكل|شواكل|شيكلان|شيكلًا/.test(receiptBody ?? ''),
+          receiptBody?.match(/فقط: (.{0,60})/)?.[1])
+    check('الإيصال يعرض رمز الشيكل مع المبلغ', Boolean(receiptBody?.includes('₪')))
   }
 
   // ---------- المصروفات ----------

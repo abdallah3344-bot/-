@@ -8,6 +8,7 @@ import { Pagination } from '@/components/shared/pagination'
 import { ExpensesView } from '@/modules/finance/components/expenses-view'
 import { formatMoney } from '@/lib/utils'
 import type { SearchParams } from '@/lib/query'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'المصروفات' }
 
@@ -28,10 +29,10 @@ export default async function ExpensesPage({
         .order('created_at', { ascending: false }).limit(1000),
       supabase.from('clients').select('id, name').is('deleted_at', null).order('name').limit(1000),
       supabase.from('accounts').select('id, name').is('deleted_at', null).eq('is_active', true),
-      supabase.from('settings').select('currency_symbol').maybeSingle(),
+      supabase.from('settings').select('currency_code').maybeSingle(),
     ])
 
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
   const sum = rows.reduce((s, r) => s + Number(r.amount ?? 0), 0)
 
   return (

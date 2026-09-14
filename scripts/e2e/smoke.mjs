@@ -100,7 +100,30 @@ try {
   const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'))
   check('الوضع الليلي يعمل', isDark)
 
-  // 10) التجاوب مع الموبايل
+  // 10) الشريط الجانبي على سطح المكتب
+  // الفحص بالإحداثيات لا بـ isVisible: عطل سابق أزاح الشريط 288 بكسل
+  // خارج الشاشة، وبقي «ظاهرًا» بمقاييس CSS بينما لا يراه أحد.
+  await page.setViewportSize({ width: 1920, height: 950 })
+  await page.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
+  const side = await page.evaluate(() => {
+    const el = document.querySelector('[data-sidebar]')
+    if (!el) return null
+    const r = el.getBoundingClientRect()
+    return { left: r.left, right: r.right, width: r.width, vw: document.documentElement.clientWidth }
+  })
+  check('الشريط الجانبي موجود على سطح المكتب', side !== null)
+  check('الشريط الجانبي داخل حدود الشاشة فعليًا',
+    Boolean(side && side.left >= 0 && side.right <= side.vw + 1 && side.width > 200),
+    side ? `left=${Math.round(side.left)} right=${Math.round(side.right)} vw=${side.vw}` : '')
+  check('الشريط يعرض روابط الوحدات',
+    (await page.locator('[data-sidebar] nav a').count()) >= 20)
+
+  // التنقّل بالنقر على الشريط لا بالعنوان مباشرة
+  await page.click('[data-sidebar] nav a[href="/clients"]')
+  await page.waitForURL('**/clients', { timeout: 15000 })
+  check('التنقّل من الشريط الجانبي يعمل', page.url().includes('/clients'))
+
+  // 11) التجاوب مع الموبايل
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
   const overflow = await page.evaluate(
@@ -110,7 +133,21 @@ try {
   const burger = await page.isVisible('button[aria-label="فتح القائمة"]')
   check('زر القائمة يظهر على الموبايل', burger)
 
-  // 11) تسجيل الخروج
+  const hiddenOnMobile = await page.evaluate(() => {
+    const r = document.querySelector('[data-sidebar]').getBoundingClientRect()
+    return r.left >= document.documentElement.clientWidth - 1
+  })
+  check('الشريط مطويّ خارج الشاشة على الموبايل', hiddenOnMobile)
+
+  await page.click('button[aria-label="فتح القائمة"]')
+  await page.waitForTimeout(400)
+  const openedOnMobile = await page.evaluate(() => {
+    const r = document.querySelector('[data-sidebar]').getBoundingClientRect()
+    return r.right <= document.documentElement.clientWidth + 1 && r.width > 200
+  })
+  check('زر القائمة يفتح الشريط على الموبايل', openedOnMobile)
+
+  // 12) تسجيل الخروج
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
   await page.click('button:has-text("مدير النظام")')

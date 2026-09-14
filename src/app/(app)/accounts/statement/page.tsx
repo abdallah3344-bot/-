@@ -9,6 +9,7 @@ import { StatementPicker } from '@/modules/finance/components/statement-picker'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatDate, formatMoney } from '@/lib/utils'
 import { readParam, type SearchParams } from '@/lib/query'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'كشف حساب عميل' }
 
@@ -31,10 +32,10 @@ export default async function StatementPage({
   const [clientsRes, settingsRes] = await Promise.all([
     supabase.from('clients').select('id, name, client_no').is('deleted_at', null)
       .order('name').limit(1000),
-    supabase.from('settings').select('currency_symbol, office_name').maybeSingle(),
+    supabase.from('settings').select('currency_code, office_name').maybeSingle(),
   ])
 
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
   const statement = clientId ? await getClientStatement(clientId) : null
 
   return (

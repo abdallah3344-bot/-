@@ -7,6 +7,7 @@ import { Pagination } from '@/components/shared/pagination'
 import { FeesView } from '@/modules/finance/components/fees-view'
 import { formatMoney } from '@/lib/utils'
 import type { SearchParams } from '@/lib/query'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'أتعاب المحاماة' }
 
@@ -24,12 +25,12 @@ export default async function FeesPage({
     supabase.from('cases').select('id, title, internal_no').is('deleted_at', null)
       .not('status', 'in', '("archived")')
       .order('created_at', { ascending: false }).limit(1000),
-    supabase.from('settings').select('currency_symbol').maybeSingle(),
+    supabase.from('settings').select('currency_code').maybeSingle(),
   ])
 
   const paidMap = await getPaidByCaseMap(rows.map((r) => r.case_id))
   const paidByCase = Object.fromEntries(paidMap)
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
 
   const totalFees = rows.reduce((s, r) => s + Number(r.total_amount ?? 0), 0)
 

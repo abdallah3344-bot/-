@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { Button } from '@/components/ui/button'
 import { formatDate, formatMoney, cn } from '@/lib/utils'
 import { readParam, type SearchParams } from '@/lib/query'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export async function generateMetadata({
   params,
@@ -53,10 +54,10 @@ export default async function ReportPage({
       client: readParam(query, 'client'),
     }),
     getReportFilterOptions(),
-    supabase.from('settings').select('currency_symbol, office_name').maybeSingle(),
+    supabase.from('settings').select('currency_code, office_name').maybeSingle(),
   ])
 
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
 
   const totals = report.totals
     ? Object.fromEntries(

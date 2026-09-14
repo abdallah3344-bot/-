@@ -35,11 +35,17 @@ export function Sidebar({ items, officeName, officeLogoUrl, open, onClose }: Pro
       ) : null}
 
       <aside
+        data-sidebar
         className={cn(
           'fixed inset-y-0 start-0 z-50 flex w-72 flex-col bg-sidebar text-sidebar-foreground',
           'transition-transform duration-200 ease-out',
+          // على الشاشات الكبيرة: عمود ثابت داخل التخطيط بلا أي إزاحة.
           'lg:static lg:translate-x-0',
-          open ? 'translate-x-0' : 'translate-x-full rtl:translate-x-full lg:translate-x-0',
+          // الإخفاء إزاحةً يخصّ الموبايل وحده. استُخدم max-lg بدل إزاحة
+          // عامة يلغيها lg: لأن ترتيب مُبدّلات Tailwind 4 جعل rtl: يتغلّب
+          // على lg:، فبقي الشريط مُزاحًا خارج الشاشة على سطح المكتب.
+          // الواجهة عربية RTL دائمًا، فجهة البداية هي اليمين والإزاحة موجبة.
+          !open && 'max-lg:translate-x-full',
         )}
       >
         {/* رأس الشريط */}

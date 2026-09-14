@@ -1,6 +1,7 @@
 import { Scale } from 'lucide-react'
 import { formatDate, formatMoney } from '@/lib/utils'
 import { INVOICE_STATUS_LABELS, PAYMENT_METHOD_LABELS, labelOf } from '@/lib/constants/enums'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 type Settings = Record<string, unknown> | null
 
@@ -23,7 +24,7 @@ function text(value: unknown): string {
 export function InvoiceSheet({ invoice, items, payments, settings }: Props) {
   const client = invoice.clients as Record<string, unknown> | null
   const relatedCase = invoice.cases as Record<string, unknown> | null
-  const symbol = text(settings?.currency_symbol) || 'ر.س'
+  const symbol = currencySymbol(text(settings?.currency_code))
 
   const total = Number(invoice.total ?? 0)
   const paid = Number(invoice.paid_amount ?? 0)

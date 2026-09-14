@@ -15,6 +15,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/select'
 import { FormField, FormError } from '@/components/shared/form-field'
+import { CURRENCIES, DEFAULT_CURRENCY_CODE } from '@/lib/constants/currencies'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 const initialState: ActionResult = { ok: true }
@@ -89,16 +90,19 @@ export function OfficeSettingsForm({ settings }: { settings: Settings }) {
           <CardTitle>العملة والضريبة</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-5 sm:grid-cols-2">
-          <FormField name="currencyCode" label="رمز العملة" required error={err('currencyCode')}
-                     hint="مثال: SAR أو AED أو EGP">
-            <Input id="currencyCode" name="currencyCode" dir="ltr" className="text-start"
-                   defaultValue={text(settings, 'currency_code', 'SAR')} />
-          </FormField>
-
-          <FormField name="currencySymbol" label="رمز العرض" required error={err('currencySymbol')}
-                     hint="يظهر بجانب كل مبلغ">
-            <Input id="currencySymbol" name="currencySymbol"
-                   defaultValue={text(settings, 'currency_symbol', 'ر.س')} />
+          <FormField name="currencyCode" label="العملة" required error={err('currencyCode')}
+                     hint="تظهر بجانب كل مبلغ، وتُستعمل في تفقيط الإيصالات">
+            <Select name="currencyCode"
+                    defaultValue={text(settings, 'currency_code', DEFAULT_CURRENCY_CODE)}>
+              <SelectTrigger id="currencyCode"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {CURRENCIES.map((currency) => (
+                  <SelectItem key={currency.code} value={currency.code}>
+                    {currency.nameAr} — {currency.symbol}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </FormField>
 
           <div className="space-y-2">

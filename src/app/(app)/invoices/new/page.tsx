@@ -3,6 +3,7 @@ import { requirePermission } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/shared/page-header'
 import { InvoiceForm } from '@/modules/finance/components/invoice-form'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'فاتورة جديدة' }
 
@@ -14,7 +15,7 @@ export default async function NewInvoicePage() {
     supabase.from('clients').select('id, name').is('deleted_at', null).order('name').limit(1000),
     supabase.from('cases').select('id, title, internal_no').is('deleted_at', null)
       .order('created_at', { ascending: false }).limit(1000),
-    supabase.from('settings').select('tax_enabled, tax_rate, currency_symbol').maybeSingle(),
+    supabase.from('settings').select('tax_enabled, tax_rate, currency_code').maybeSingle(),
   ])
 
   return (
@@ -28,7 +29,7 @@ export default async function NewInvoicePage() {
           options={{ clients: clientsRes.data ?? [], cases: casesRes.data ?? [] }}
           defaultTaxRate={Number(settingsRes.data?.tax_rate ?? 0)}
           taxEnabled={Boolean(settingsRes.data?.tax_enabled)}
-          currencySymbol={settingsRes.data?.currency_symbol ?? 'ر.س'}
+          currencySymbol={currencySymbol(settingsRes.data?.currency_code)}
         />
       </div>
     </>

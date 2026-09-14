@@ -11,6 +11,7 @@ import { AccountsView } from '@/modules/finance/components/accounts-view'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/lib/utils'
+import { currencySymbol } from '@/lib/constants/currencies'
 
 export const metadata: Metadata = { title: 'الحسابات' }
 
@@ -21,10 +22,10 @@ export default async function AccountsPage() {
   const [accounts, summary, settingsRes] = await Promise.all([
     listAccounts(),
     getFinanceSummary(),
-    supabase.from('settings').select('currency_symbol').maybeSingle(),
+    supabase.from('settings').select('currency_code').maybeSingle(),
   ])
 
-  const symbol = settingsRes.data?.currency_symbol ?? 'ر.س'
+  const symbol = currencySymbol(settingsRes.data?.currency_code)
 
   const withBalances = accounts.map((account) => {
     const movement = summary.byAccount.get(account.id) ?? { in: 0, out: 0 }
