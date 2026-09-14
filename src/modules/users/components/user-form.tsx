@@ -111,7 +111,7 @@ export function UserForm({ roles, mode, defaults, isSelf }: Props) {
             <Input
               id="phone" name="phone" dir="ltr" className="text-start"
               defaultValue={defaults?.phone ?? ''}
-              placeholder="0500000000"
+              placeholder="0599000000"
             />
           </FormField>
 

@@ -9,6 +9,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  SelectGroup, SelectLabel,
+} from '@/components/ui/select'
+import { GOVERNORATE_GROUPS } from '@/lib/constants/palestine'
 
 export type LookupItem = {
   id: string
@@ -94,11 +99,21 @@ export function LookupManager({
               onKeyDown={(e) => e.key === 'Enter' && name.trim() && save()}
             />
             {withGovernorate ? (
-              <Input
-                value={governorate} onChange={(e) => setGovernorate(e.target.value)}
-                placeholder="المحافظة" className="h-9 w-36"
-                aria-label="المحافظة"
-              />
+              <Select value={governorate} onValueChange={setGovernorate}>
+                <SelectTrigger className="h-9 w-44" aria-label="المحافظة">
+                  <SelectValue placeholder="المحافظة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GOVERNORATE_GROUPS.map((group) => (
+                    <SelectGroup key={group.label}>
+                      <SelectLabel>{group.label}</SelectLabel>
+                      {group.items.map((gov) => (
+                        <SelectItem key={gov} value={gov}>{gov}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             ) : null}
             <Button size="sm" onClick={() => save()} disabled={pending || !name.trim()}>
               {pending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}

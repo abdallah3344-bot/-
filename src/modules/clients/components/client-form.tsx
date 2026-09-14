@@ -114,12 +114,12 @@ export function ClientForm({ mode, lawyers, defaults }: Props) {
         <CardContent className="grid gap-5 sm:grid-cols-2">
           <FormField name="phone" label="الهاتف" error={err('phone')}>
             <Input id="phone" name="phone" dir="ltr" className="text-start"
-                   defaultValue={defaults?.phone ?? ''} placeholder="0500000000" />
+                   defaultValue={defaults?.phone ?? ''} placeholder="0599000000" />
           </FormField>
 
           <FormField name="whatsapp" label="واتساب" error={err('whatsapp')}>
             <Input id="whatsapp" name="whatsapp" dir="ltr" className="text-start"
-                   defaultValue={defaults?.whatsapp ?? ''} placeholder="0500000000" />
+                   defaultValue={defaults?.whatsapp ?? ''} placeholder="0599000000" />
           </FormField>
 
           <FormField name="email" label="البريد الإلكتروني" error={err('email')}>

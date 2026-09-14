@@ -76,6 +76,10 @@ try {
   }
   await page.keyboard.press('Escape')
 
+  // ضريبة القيمة المضافة في فلسطين 16%
+  check('نسبة الضريبة الافتراضية 16%', (await page.inputValue('#taxRate')) === '16',
+    await page.inputValue('#taxRate'))
+
   // رمز العملة ينعكس على المبالغ في الشاشات المالية
   await page.goto(`${BASE}/invoices`, { waitUntil: 'networkidle' })
   const invoicesBody = (await page.textContent('body')) ?? ''

@@ -11,7 +11,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  SelectGroup, SelectLabel,
 } from '@/components/ui/select'
+import { GOVERNORATE_GROUPS } from '@/lib/constants/palestine'
 import { FormField, FormError } from '@/components/shared/form-field'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
@@ -161,7 +163,20 @@ export function CaseForm({ mode, options, defaultClientId, defaults }: Props) {
           </FormField>
 
           <FormField name="governorate" label="المحافظة" error={err('governorate')}>
-            <Input id="governorate" name="governorate" defaultValue={defaults?.governorate ?? ''} />
+            <Select name="governorate" defaultValue={defaults?.governorate ?? NONE}>
+              <SelectTrigger id="governorate"><SelectValue placeholder="غير محدّدة" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>غير محدّدة</SelectItem>
+                {GOVERNORATE_GROUPS.map((group) => (
+                  <SelectGroup key={group.label}>
+                    <SelectLabel>{group.label}</SelectLabel>
+                    {group.items.map((gov) => (
+                      <SelectItem key={gov} value={gov}>{gov}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
           </FormField>
 
           <FormField name="litigationDegree" label="درجة التقاضي" error={err('litigationDegree')}>

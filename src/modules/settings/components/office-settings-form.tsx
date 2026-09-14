@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select'
 import { FormField, FormError } from '@/components/shared/form-field'
 import { CURRENCIES, DEFAULT_CURRENCY_CODE } from '@/lib/constants/currencies'
+import { DEFAULT_VAT_RATE } from '@/lib/constants/palestine'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 const initialState: ActionResult = { ok: true }
@@ -119,7 +120,7 @@ export function OfficeSettingsForm({ settings }: { settings: Settings }) {
           <FormField name="taxRate" label="نسبة الضريبة %" error={err('taxRate')}>
             <Input id="taxRate" name="taxRate" type="number" step="0.01" min="0" max="100"
                    dir="ltr" className="text-start"
-                   defaultValue={text(settings, 'tax_rate', '15')}
+                   defaultValue={text(settings, 'tax_rate', String(DEFAULT_VAT_RATE))}
                    aria-invalid={Boolean(err('taxRate'))} />
           </FormField>
         </CardContent>

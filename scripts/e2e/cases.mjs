@@ -54,7 +54,31 @@ try {
   await page.fill('#courtCaseNo', `2026/${stamp}`)
   await page.fill('#claimAmount', '150000')
   await page.click('#caseTypeId')
+  const caseTypeOptions = (await page.locator('[role=option]').allTextContents()).join(' | ')
+  // النظام موجَّه لفلسطين: التسميات تتبع الممارسة هناك
+  for (const t of ['حقوق', 'جزاء', 'تنفيذ', 'أحوال شخصية شرعية', 'أراضي وتسوية']) {
+    check(`نوع القضية «${t}» متاح`, caseTypeOptions.includes(t))
+  }
+  check('لا أنواع قضايا من بقايا الاختبارات', !/قضايا تحكيم \d{6}/.test(caseTypeOptions))
   await page.click('[role=option]:has-text("تجارية")')
+
+  // المحاكم فلسطينية
+  await page.click('#courtId')
+  const courtOptions = (await page.locator('[role=option]').allTextContents()).join(' | ')
+  check('المحاكم الفلسطينية مُحمَّلة',
+    courtOptions.includes('محكمة بداية رام الله') && courtOptions.includes('محكمة صلح نابلس'))
+  check('محكمة النقض موجودة', courtOptions.includes('محكمة النقض'))
+  check('لا محاكم من خارج فلسطين', !courtOptions.includes('الرياض'))
+  await page.keyboard.press('Escape')
+
+  // المحافظة قائمة اختيار بالمحافظات الفلسطينية لا حقلًا حرًّا
+  await page.click('#governorate')
+  const govOptions = (await page.locator('[role=option]').allTextContents()).join(' | ')
+  for (const g of ['رام الله والبيرة', 'نابلس', 'الخليل', 'غزة', 'خان يونس']) {
+    check(`المحافظة «${g}» متاحة`, govOptions.includes(g))
+  }
+  await page.click('[role=option]:has-text("رام الله والبيرة")')
+
   await page.click('#priority')
   await page.click('[role=option]:has-text("عالية")')
   await page.click('button[type=submit]')
