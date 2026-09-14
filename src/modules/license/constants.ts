@@ -32,4 +32,6 @@ export const LICENSE_STATE_LABELS: Record<string, string> = {
   key_required: 'مطلوب مفتاح الترخيص',
   name_required: 'مطلوب اسم المكتب',
   unreachable: 'تعذّر الوصول لخادم التراخيص',
+  misconfigured: 'إعدادات الترخيص ناقصة على الخادم',
+  not_activated: 'النظام غير مفعَّل',
 }

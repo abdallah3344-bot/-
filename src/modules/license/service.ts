@@ -45,11 +45,12 @@ export type LicenseInputs = {
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '1.0.0'
 
-function apiBase(): string {
-  const url = process.env.LICENSE_API_URL
-  if (!url) throw new Error('LICENSE_API_URL غير مضبوط')
-  return url.replace(/\/+$/, '')
-}
+/**
+ * سبب فشل النداء. التمييز مقصود: انقطاع الشبكة عارض ولا يصحّ أن يعطّل
+ * المكتب، أما نقص الإعدادات فخطأ نشر — لو فتحنا النظام عنده لصار تعطيل
+ * البوابة بحذف متغيّر بيئة.
+ */
+export type VerifyFailure = 'config' | 'network'
 
 /** نداء واحد إلى verify_license عبر REST — من الخادم فقط. */
 export async function callVerifyLicense(params: {
@@ -57,12 +58,19 @@ export async function callVerifyLicense(params: {
   licenseKey?: string | null
   phone?: string | null
   clientName?: string | null
-}): Promise<{ ok: true; data: VerifyResponse } | { ok: false; error: string }> {
+}): Promise<{ ok: true; data: VerifyResponse } | { ok: false; error: string; kind: VerifyFailure }> {
   const key = process.env.LICENSE_API_KEY
-  if (!key) return { ok: false, error: 'مفاتيح الاتصال بخادم التراخيص غير مضبوطة.' }
+  const url = process.env.LICENSE_API_URL?.replace(/\/+$/, '')
+
+  if (!key || !url) {
+    return {
+      ok: false, kind: 'config',
+      error: 'إعدادات الاتصال بخادم التراخيص ناقصة على هذا الخادم.',
+    }
+  }
 
   try {
-    const response = await fetch(`${apiBase()}/rest/v1/rpc/verify_license`, {
+    const response = await fetch(`${url}/rest/v1/rpc/verify_license`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -82,12 +90,15 @@ export async function callVerifyLicense(params: {
     })
 
     if (!response.ok) {
-      return { ok: false, error: `خادم التراخيص ردّ بالحالة ${response.status}.` }
+      return {
+        ok: false, kind: 'network',
+        error: `خادم التراخيص ردّ بالحالة ${response.status}.`,
+      }
     }
 
     return { ok: true, data: (await response.json()) as VerifyResponse }
   } catch {
-    return { ok: false, error: 'تعذّر الوصول لخادم التراخيص.' }
+    return { ok: false, kind: 'network', error: 'تعذّر الوصول لخادم التراخيص.' }
   }
 }
 
@@ -161,9 +172,12 @@ export const getLicenseStatus = cache(async (): Promise<LicenseStatus> => {
   })
 
   if (!result.ok) {
-    return {
-      ...base, allowed: true, state: 'unreachable', message: result.error, degraded: true,
+    // نقص الإعدادات خطأ نشر يُغلق النظام: فتحه عنده يجعل تعطيل البوابة
+    // ممكنًا بحذف متغيّر بيئة. أما انقطاع الشبكة فيُبقيه عاملًا مع تنبيه.
+    if (result.kind === 'config') {
+      return { ...base, allowed: false, state: 'misconfigured', message: result.error, degraded: false }
     }
+    return { ...base, allowed: true, state: 'unreachable', message: result.error, degraded: true }
   }
 
   const data = result.data
