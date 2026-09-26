@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 /**
- * رؤوس الأمان تُضبط هنا لا في netlify.toml، لأن صفحات Next
- * تُقدَّم من دالة الخادم ولا تمرّ على قواعد رؤوس Netlify.
+ * رؤوس الأمان تُضبط هنا لا في إعدادات الاستضافة، لأن صفحات Next
+ * تُقدَّم من وقت تشغيل الخادم ولا تمرّ على قواعد رؤوس المنصّة.
  */
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -21,3 +22,6 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// يتيح لخادم التطوير المحلي رؤية ارتباطات Cloudflare كما في الإنتاج.
+initOpenNextCloudflareForDev();

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // مخرجات بناء Cloudflare — كود مولَّد لا يُفحص
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

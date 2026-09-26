@@ -1,0 +1,34 @@
+/**
+ * إعدادات نشر نظام إدارة مكتب المحاماة على Cloudflare Workers.
+ *
+ * المحوّل @opennextjs/cloudflare يشغّل Next.js على وقت تشغيل Node
+ * داخل Worker — لا Edge runtime. هذا ما يجعل مكوّنات الخادم
+ * و Server Actions و proxy.ts وتعبئة قوالب Word تعمل كما هي.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "masri-law-office",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": [
+    // لازم لـ Buffer و node:zlib التي تستعملها تعبئة قوالب Word
+    "nodejs_compat",
+    // يمنع الـ Worker من مناداة نفسه داخليًا عبر fetch
+    "global_fetch_strictly_public"
+  ],
+  /**
+   * إسباild داخل wrangler يغلّف الدوال بمساعد __name للحفاظ على
+   * أسمائها. مكتبة next-themes تُسلسل دالتها إلى نصّ وتضعه سكربتًا
+   * مضمَّنًا في الصفحة، فيخرج المساعد إلى المتصفح حيث لا وجود له
+   * ويرمي ReferenceError ويُعطّل منع وميض الوضع الليلي.
+   */
+  "keep_names": false,
+
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

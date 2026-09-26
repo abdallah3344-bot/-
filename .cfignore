@@ -1,0 +1,7 @@
+# ما لا يُرفع مع الـ Worker
+node_modules
+.next
+.git
+scripts/e2e
+supabase
+docs

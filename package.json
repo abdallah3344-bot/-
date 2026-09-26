@@ -11,10 +11,14 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "node scripts/e2e/run-all.mjs",
     "dev:test": "LICENSE_API_URL=http://127.0.0.1:3999 LICENSE_API_KEY=stub next dev",
-    "migrations:export": "node scripts/export-migrations.mjs"
+    "migrations:export": "node scripts/export-migrations.mjs",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@opennextjs/cloudflare": "^1.20.6",
     "@radix-ui/react-accordion": "^1.2.20",
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-avatar": "^1.2.6",
@@ -51,7 +55,6 @@
     "zod": "^4.6.4"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.15.13",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -62,6 +65,7 @@
     "playwright": "^1.63.0",
     "supabase": "^2.117.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.141.0"
   }
 }

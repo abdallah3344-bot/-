@@ -11,6 +11,7 @@
 | الطبقة | التقنية |
 |---|---|
 | الإطار | Next.js 16 (App Router, Server Actions) |
+| الاستضافة | Cloudflare Workers عبر `@opennextjs/cloudflare` |
 | اللغة | TypeScript — وضع `strict` |
 | التنسيق | Tailwind CSS v4 |
 | المكوّنات | shadcn/ui (منسوخة داخل المستودع) |
@@ -60,6 +61,9 @@ npm run dev
 | `npm run typecheck` | فحص الأنواع دون بناء |
 | `npm run types:gen` | إعادة توليد أنواع قاعدة البيانات بعد أي تعديل على المخطط |
 | `npm run migrations:export` | تصدير ترحيلات القاعدة إلى المستودع بعد أي تعديل على المخطط |
+| `npm run cf:build` | بناء نسخة Cloudflare Worker |
+| `npm run cf:preview` | تشغيل النظام محليًا داخل محرّك Cloudflare (workerd) |
+| `npm run cf:deploy` | بناء ونشر على Cloudflare |
 | `npm run test:e2e` | اختبار دخان حقيقي بالمتصفح (يتطلب `npm run dev` يعمل) |
 
 ---
@@ -340,52 +344,62 @@ NEXT_PUBLIC_APP_VERSION   الإصدار المُبلَّغ للوحة عند ك
 ```
 
 ---
-
-## النشر على Netlify
-
-النظام منشور ويعمل على Netlify ضمن حساب المصري جروب:
+## النشر على Cloudflare Workers
 
 | | |
 |---|---|
-| الموقع | https://masri-law-office.netlify.app |
-| لوحة Netlify | https://app.netlify.com/projects/masri-law-office |
-| قاعدة البيانات | مشروع Supabase مستقل `Law Office` — منفصل تمامًا عن بيانات منصة المصري |
+| المنصّة | Cloudflare Workers عبر `@opennextjs/cloudflare` |
+| اسم الـ Worker | `masri-law-office` |
+| قاعدة البيانات | مشروع Supabase مستقل `Law Office` |
 
-### كيف يُبنى
+النشر على Cloudflare **وحده**. لم يعد للمستودع أي إعداد Netlify.
 
-`netlify.toml` يضبط أمر البناء و Node 22 ومحرك `@netlify/plugin-nextjs`،
-وهو ما يجعل مكونات الخادم و Server Actions و `proxy.ts` تعمل داخل دوال
-Netlify بدل بناء الموقع كملفات ساكنة. رؤوس الأمان مضبوطة في
-`next.config.ts` لا في `netlify.toml`، لأن ردود Next تخرج من دالة الخادم
-ولا تمرّ على قواعد رؤوس Netlify.
+### الأوامر
 
-متغيّرا البيئة المضبوطان على الموقع:
+```bash
+npm run cf:build     # بناء Next ثم تحويله إلى Worker
+npm run cf:preview   # تشغيله محليًا داخل محرّك Cloudflare (workerd)
+npm run cf:deploy    # بناء ونشر
+```
+
+### لماذا OpenNext لا next-on-pages
+
+المحوّل القديم `@cloudflare/next-on-pages` يشغّل Edge runtime وحده،
+وهذا يُسقط `proxy.ts` ومكتبات Node التي تعتمد عليها تعبئة قوالب Word.
+`@opennextjs/cloudflare` يشغّل وقت تشغيل Node داخل الـ Worker عبر علم
+`nodejs_compat`، فيعمل النظام كما هو بلا إعادة كتابة.
+
+### إعدادات تستحق الانتباه
+
+- **`keep_names: false`** في `wrangler.jsonc`: إسباild داخل wrangler
+  يغلّف الدوال بمساعد `__name`، ومكتبة next-themes تُسلسل دالتها إلى
+  نصّ وتضعه سكربتًا مضمَّنًا في الصفحة، فيخرج المساعد إلى المتصفح حيث
+  لا وجود له ويرمي `ReferenceError` ويُعطّل منع وميض الوضع الليلي.
+- **بلا تخزين مؤقت متزايد** في `open-next.config.ts`: كل صفحات النظام
+  ديناميكية ومحكومة بالجلسة والصلاحيات، فلا شيء يصحّ تخزينه ليُقدَّم
+  لمستخدم آخر.
+- **`global_fetch_strictly_public`**: يمنع الـ Worker من مناداة نفسه
+  داخليًا عبر fetch.
+
+### متغيّرات البيئة
+
+تُضبط أسرارًا على الـ Worker:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
+LICENSE_API_URL
+LICENSE_API_KEY
+NEXT_PUBLIC_APP_VERSION
 ```
 
-### نشر نسخة جديدة يدويًا
+للتشغيل المحلي داخل workerd تُوضع في `.dev.vars` (غير متعقَّب في git).
 
-```bash
-npm run build
-npx netlify deploy --prod --site masri-law-office
-```
+### حجم الحزمة
 
-### ربط النشر التلقائي بـ GitHub
+الـ Worker **3.8 ميجابايت مضغوطًا**. حدّ خطة Workers المدفوعة 10
+ميجابايت، وحدّ المجانية 3 — فالنشر يتطلّب خطة Workers المدفوعة.
 
-النشر التلقائي عند كل `git push` غير مفعَّل بعد، ويحتاج خطوة واحدة من
-لوحة Netlify لأن ربط المستودع يمرّ بمصادقة GitHub لا يمكن إتمامها
-برمجيًا:
-
-1. افتح <https://app.netlify.com/projects/masri-law-office/configuration/deploys>
-2. اضغط **Link repository** واختر مستودع GitHub والفرع المطلوب.
-3. اترك أمر البناء ومجلّد النشر فارغَين — يقرأهما Netlify من `netlify.toml`.
-
-بعدها يبني Netlify وينشر تلقائيًا مع كل دفعة إلى الفرع المختار.
-
----
 
 ## ما لم يُنفَّذ
 

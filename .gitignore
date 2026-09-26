@@ -48,3 +48,8 @@ next-env.d.ts
 
 # حزم النشر المؤقتة التي ينشئها Netlify CLI
 deploy-*.zip
+
+# مخرجات بناء Cloudflare
+.open-next/
+.wrangler/
+.dev.vars
