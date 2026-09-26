@@ -23,6 +23,11 @@
    * ويرمي ReferenceError ويُعطّل منع وميض الوضع الليلي.
    */
   "keep_names": false,
+  /**
+   * التصغير يُنزل الـ Worker من 3.3 إلى 2.8 ميجابايت مضغوطًا مع
+   * scripts/cf-strip-og.mjs — تحت حدّ 3 ميجابايت للخطة المجانية.
+   */
+  "minify": true,
 
   "assets": {
     "binding": "ASSETS",

@@ -383,7 +383,7 @@ npm run cf:deploy    # بناء ونشر
 
 ### متغيّرات البيئة
 
-تُضبط أسرارًا على الـ Worker:
+في `.env.production` (مفاتيح عامة فقط):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL
@@ -397,9 +397,27 @@ NEXT_PUBLIC_APP_VERSION
 
 ### حجم الحزمة
 
-الـ Worker **3.8 ميجابايت مضغوطًا**. حدّ خطة Workers المدفوعة 10
-ميجابايت، وحدّ المجانية 3 — فالنشر يتطلّب خطة Workers المدفوعة.
+الـ Worker **2.8 ميجابايت مضغوطًا** — تحت حدّ الخطة المجانية (3).
+وصل إليه بخطوتين:
 
+- **`minify: true`** في `wrangler.jsonc` (من 3.8 إلى 3.3).
+- **`scripts/cf-strip-og.mjs`** يُشغَّل آليًا ضمن `cf:build`: المحوّل
+  يسحب مكتبة توليد الصور `@vercel/og` مع `resvg.wasm` و `yoga.wasm`
+  إلى حزمة طبقة الحماية رغم أن النظام لا يستعملها. السكربت يُزيلها
+  (من 3.3 إلى 2.8)، ويتوقّف تلقائيًا إن استُعمل `next/og` يومًا.
+
+### النشر الآلي
+
+المستودع مربوط بـ Cloudflare Workers Builds: كل دفع إلى الفرع
+`claude/law-office-management-system-bityzm` يبني وينشر تلقائيًا على `law.masryps.com`.
+
+| | |
+|---|---|
+| أمر البناء | `npm run cf:build` |
+| أمر النشر | `npx wrangler deploy` |
+
+قيم البيئة العامة في `.env.production` (متعقَّب في git) فلا حاجة
+لضبطها في لوحة Cloudflare.
 
 ## ما لم يُنفَّذ
 

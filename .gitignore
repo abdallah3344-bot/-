@@ -45,6 +45,7 @@ next-env.d.ts
 
 # استثناء قالب متغيرات البيئة من التجاهل — لا يحتوي أي مفتاح سري
 !.env.example
+!.env.production
 
 # حزم النشر المؤقتة التي ينشئها Netlify CLI
 deploy-*.zip

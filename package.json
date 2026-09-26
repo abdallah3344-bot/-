@@ -12,9 +12,9 @@
     "test:e2e": "node scripts/e2e/run-all.mjs",
     "dev:test": "LICENSE_API_URL=http://127.0.0.1:3999 LICENSE_API_KEY=stub next dev",
     "migrations:export": "node scripts/export-migrations.mjs",
-    "cf:build": "opennextjs-cloudflare build",
-    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:build": "opennextjs-cloudflare build && node scripts/cf-strip-og.mjs",
+    "cf:preview": "npm run cf:build && opennextjs-cloudflare preview",
+    "cf:deploy": "npm run cf:build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
