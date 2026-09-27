@@ -43,7 +43,7 @@
   "vars": {
     "CF_ACCOUNT_ID": "684ba792ce69017f95cf59070c35b346",
     "CF_ZONE_ID": "d7ce02a8903c9026c2a179b7aecce546",
-    "CF_WORKER_NAME": "masri-law-office"
+    "CF_WORKER_NAME": "masri-law-office-test"
   },
   "observability": {
     "enabled": true
