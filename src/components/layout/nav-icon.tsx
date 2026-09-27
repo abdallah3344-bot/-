@@ -5,7 +5,7 @@ import {
   FolderOpen, ScrollText, FileSignature, Banknote, Receipt, HandCoins,
   TrendingDown, Wallet, Mails, UserCog, ChartColumn, Archive, Bell,
   Settings, ShieldCheck, History, Circle, MessageSquarePlus, ClipboardCheck, FileSpreadsheet,
-  FileStack,
+  FileStack, Building2,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -14,7 +14,7 @@ const ICONS: Record<string, LucideIcon> = {
   FolderOpen, ScrollText, FileSignature, Banknote, Receipt, HandCoins,
   TrendingDown, Wallet, Mails, UserCog, ChartColumn, Archive, Bell,
   Settings, ShieldCheck, History, MessageSquarePlus, ClipboardCheck, FileSpreadsheet,
-  FileStack,
+  FileStack, Building2,
 }
 
 export function NavIcon({ name, className }: { name: string; className?: string }) {

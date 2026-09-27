@@ -1,14 +1,10 @@
 import { Scale } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { getHostOffice } from '@/lib/office-host'
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: settings } = await supabase
-    .from('settings')
-    .select('office_name, office_logo_url')
-    .maybeSingle()
-
-  const officeName = settings?.office_name ?? 'مكتب المحاماة'
+  // صفحات الدخول قبل تسجيله: الاسم يأتي من رابط المكتب الفرعي إن وُجد
+  const hostOffice = await getHostOffice()
+  const officeName = hostOffice?.name ?? 'نظام إدارة مكاتب المحاماة'
 
   return (
     <div className="min-h-dvh grid lg:grid-cols-2">

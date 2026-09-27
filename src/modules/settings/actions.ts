@@ -147,7 +147,8 @@ export async function uploadLogoAction(
 
   const supabase = await createClient()
   const extension = file.type === 'image/svg+xml' ? 'svg' : file.type.split('/')[1]
-  const path = `logo-${Date.now()}.${extension}`
+  // أول مجلد في المسار هو معرّف المكتب — سياسة التخزين ترفض غيره
+  const path = `${guard.user.officeId}/logo-${Date.now()}.${extension}`
 
   const { error: uploadError } = await supabase.storage
     .from('branding').upload(path, file, { contentType: file.type, upsert: true })

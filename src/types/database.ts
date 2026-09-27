@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -32,6 +33,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -45,8 +47,17 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          office_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "accounts_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       appointments: {
         Row: {
@@ -65,6 +76,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -82,6 +94,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -99,8 +112,16 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_case_id_fkey"
             columns: ["case_id"]
@@ -109,10 +130,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "appointments_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -123,10 +144,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_owner_id_fkey"
-            columns: ["owner_id"]
+            foreignKeyName: "appointments_office_fk"
+            columns: ["office_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -145,6 +166,7 @@ export type Database = {
           ip_address: string | null
           user_agent: string | null
           created_at: string
+          office_id: string | null
         }
         Insert: {
           user_id?: string | null
@@ -158,6 +180,7 @@ export type Database = {
           ip_address?: string | null
           user_agent?: string | null
           created_at?: string
+          office_id?: string | null
         }
         Update: {
           user_id?: string | null
@@ -171,6 +194,7 @@ export type Database = {
           ip_address?: string | null
           user_agent?: string | null
           created_at?: string
+          office_id?: string | null
         }
         Relationships: [
           {
@@ -178,6 +202,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -195,6 +226,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -208,6 +240,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -221,6 +254,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
           {
@@ -237,6 +271,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "case_fees_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       case_notes: {
@@ -246,6 +287,7 @@ export type Database = {
           body: string
           created_at: string
           created_by: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -253,6 +295,7 @@ export type Database = {
           body: string
           created_at?: string
           created_by?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -260,6 +303,7 @@ export type Database = {
           body?: string
           created_at?: string
           created_by?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -276,6 +320,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "case_notes_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       case_status_history: {
@@ -287,6 +338,7 @@ export type Database = {
           reason: string | null
           changed_at: string
           changed_by: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -296,6 +348,7 @@ export type Database = {
           reason?: string | null
           changed_at?: string
           changed_by?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -305,6 +358,7 @@ export type Database = {
           reason?: string | null
           changed_at?: string
           changed_by?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -321,6 +375,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "case_status_history_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       case_types: {
@@ -332,6 +393,7 @@ export type Database = {
           is_active: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -341,6 +403,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -350,8 +413,17 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "case_types_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cases: {
         Row: {
@@ -387,6 +459,7 @@ export type Database = {
           claim_requests: string | null
           claim_arose_at: string | null
           property_description: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -421,6 +494,7 @@ export type Database = {
           claim_requests?: string | null
           claim_arose_at?: string | null
           property_description?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -455,8 +529,23 @@ export type Database = {
           claim_requests?: string | null
           claim_arose_at?: string | null
           property_description?: string | null
+          office_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_responsible_lawyer_id_fkey"
+            columns: ["responsible_lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cases_assistant_lawyer_id_fkey"
             columns: ["assistant_lawyer_id"]
@@ -472,20 +561,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cases_chamber_id_fkey"
-            columns: ["chamber_id"]
-            isOneToOne: false
-            referencedRelation: "court_chambers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "cases_court_id_fkey"
             columns: ["court_id"]
             isOneToOne: false
@@ -493,10 +568,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cases_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "cases_chamber_id_fkey"
+            columns: ["chamber_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "court_chambers"
             referencedColumns: ["id"]
           },
           {
@@ -507,8 +582,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cases_responsible_lawyer_id_fkey"
-            columns: ["responsible_lawyer_id"]
+            foreignKeyName: "cases_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -518,6 +593,13 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -546,6 +628,7 @@ export type Database = {
           is_demo: boolean
           workplace: string | null
           legal_capacity: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -570,6 +653,7 @@ export type Database = {
           is_demo?: boolean
           workplace?: string | null
           legal_capacity?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -594,18 +678,19 @@ export type Database = {
           is_demo?: boolean
           workplace?: string | null
           legal_capacity?: string | null
+          office_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "clients_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "clients_responsible_lawyer_id_fkey"
+            columns: ["responsible_lawyer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "clients_responsible_lawyer_id_fkey"
-            columns: ["responsible_lawyer_id"]
+            foreignKeyName: "clients_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -615,6 +700,13 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -638,6 +730,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -657,6 +750,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -676,6 +770,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -686,8 +781,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contracts_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "contracts_lawyer_id_fkey"
+            columns: ["lawyer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -700,10 +795,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contracts_lawyer_id_fkey"
-            columns: ["lawyer_id"]
+            foreignKeyName: "contracts_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -728,6 +830,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -748,6 +851,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -768,15 +872,9 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "correspondence_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "correspondence_client_id_fkey"
             columns: ["client_id"]
@@ -785,8 +883,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "correspondence_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "correspondence_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "correspondence_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -799,10 +904,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "correspondence_owner_id_fkey"
-            columns: ["owner_id"]
+            foreignKeyName: "correspondence_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "correspondence_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -815,6 +927,7 @@ export type Database = {
           is_active: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -823,6 +936,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -831,6 +945,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Relationships: [
           {
@@ -838,6 +953,13 @@ export type Database = {
             columns: ["court_id"]
             isOneToOne: false
             referencedRelation: "courts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "court_chambers_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -853,6 +975,7 @@ export type Database = {
           is_active: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -864,6 +987,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -875,8 +999,17 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courts_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       document_categories: {
         Row: {
@@ -886,6 +1019,7 @@ export type Database = {
           is_active: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -894,6 +1028,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -902,8 +1037,17 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "document_categories_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       document_templates: {
         Row: {
@@ -922,6 +1066,7 @@ export type Database = {
           created_by: string | null
           updated_by: string | null
           deleted_at: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -939,6 +1084,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -956,6 +1102,7 @@ export type Database = {
           created_by?: string | null
           updated_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -977,6 +1124,13 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1003,6 +1157,7 @@ export type Database = {
           updated_at: string
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1025,6 +1180,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1047,20 +1203,21 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "documents_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "documents_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "document_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
             referencedColumns: ["id"]
           },
           {
@@ -1084,6 +1241,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "documents_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       expense_categories: {
@@ -1094,6 +1258,7 @@ export type Database = {
           is_active: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1102,6 +1267,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1110,8 +1276,17 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expense_categories_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       expenses: {
         Row: {
@@ -1131,6 +1306,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1149,6 +1325,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1167,27 +1344,14 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "expenses_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "expenses_case_id_fkey"
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "expenses_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "expense_categories"
             referencedColumns: ["id"]
           },
           {
@@ -1198,10 +1362,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "expenses_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1217,6 +1402,7 @@ export type Database = {
           status: string
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1228,6 +1414,7 @@ export type Database = {
           status?: string
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1239,6 +1426,7 @@ export type Database = {
           status?: string
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Relationships: [
           {
@@ -1246,6 +1434,13 @@ export type Database = {
             columns: ["case_fee_id"]
             isOneToOne: false
             referencedRelation: "case_fees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_installments_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1274,6 +1469,7 @@ export type Database = {
           updated_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1298,6 +1494,7 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1322,27 +1519,14 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "hearings_assigned_lawyer_id_fkey"
-            columns: ["assigned_lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "hearings_case_id_fkey"
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hearings_chamber_id_fkey"
-            columns: ["chamber_id"]
-            isOneToOne: false
-            referencedRelation: "court_chambers"
             referencedColumns: ["id"]
           },
           {
@@ -1353,10 +1537,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "hearings_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "hearings_chamber_id_fkey"
+            columns: ["chamber_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "court_chambers"
             referencedColumns: ["id"]
           },
           {
@@ -1367,10 +1551,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hearings_assigned_lawyer_id_fkey"
+            columns: ["assigned_lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hearings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hearings_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hearings_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1384,6 +1589,7 @@ export type Database = {
           unit_price: number
           line_total: number
           sort_order: number
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1393,6 +1599,7 @@ export type Database = {
           unit_price?: number
           line_total?: number
           sort_order?: number
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1402,6 +1609,7 @@ export type Database = {
           unit_price?: number
           line_total?: number
           sort_order?: number
+          office_id?: string
         }
         Relationships: [
           {
@@ -1409,6 +1617,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1434,6 +1649,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1455,6 +1671,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1476,15 +1693,9 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "invoices_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "invoices_client_id_fkey"
             columns: ["client_id"]
@@ -1493,10 +1704,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoices_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoices_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1511,6 +1736,7 @@ export type Database = {
           is_active: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1521,6 +1747,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1531,6 +1758,7 @@ export type Database = {
           is_active?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Relationships: [
           {
@@ -1538,6 +1766,13 @@ export type Database = {
             columns: ["court_id"]
             isOneToOne: false
             referencedRelation: "courts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "judges_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1556,6 +1791,7 @@ export type Database = {
           last_message: string | null
           last_verified_at: string | null
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: boolean
@@ -1570,6 +1806,7 @@ export type Database = {
           last_message?: string | null
           last_verified_at?: string | null
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: boolean
@@ -1584,6 +1821,7 @@ export type Database = {
           last_message?: string | null
           last_verified_at?: string | null
           updated_at?: string
+          office_id?: string
         }
         Relationships: [
           {
@@ -1593,7 +1831,38 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "license_state_office_fk"
+            columns: ["office_id"]
+            isOneToOne: true
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      login_attempts: {
+        Row: {
+          id: number
+          identifier: string
+          ip: string | null
+          success: boolean
+          attempted_at: string
+        }
+        Insert: {
+          id?: number
+          identifier: string
+          ip?: string | null
+          success?: boolean
+          attempted_at?: string
+        }
+        Update: {
+          id?: number
+          identifier?: string
+          ip?: string | null
+          success?: boolean
+          attempted_at?: string
+        }
+        Relationships: []
       }
       notification_settings: {
         Row: {
@@ -1609,6 +1878,7 @@ export type Database = {
           invoice_reminder: boolean
           updated_at: string
           last_generated_at: string | null
+          office_id: string
         }
         Insert: {
           user_id: string
@@ -1623,6 +1893,7 @@ export type Database = {
           invoice_reminder?: boolean
           updated_at?: string
           last_generated_at?: string | null
+          office_id?: string
         }
         Update: {
           user_id?: string
@@ -1637,6 +1908,7 @@ export type Database = {
           invoice_reminder?: boolean
           updated_at?: string
           last_generated_at?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -1644,6 +1916,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_settings_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1663,6 +1942,7 @@ export type Database = {
           read_at: string | null
           created_at: string
           notify_date: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1678,6 +1958,7 @@ export type Database = {
           read_at?: string | null
           created_at?: string
           notify_date?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1693,6 +1974,7 @@ export type Database = {
           read_at?: string | null
           created_at?: string
           notify_date?: string
+          office_id?: string
         }
         Relationships: [
           {
@@ -1700,6 +1982,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1716,6 +2005,45 @@ export type Database = {
         Update: {
           key?: string
           last_value?: number
+        }
+        Relationships: []
+      }
+      offices: {
+        Row: {
+          id: string
+          name: string
+          slug: string | null
+          phone: string | null
+          email: string | null
+          is_active: boolean
+          is_founding: boolean
+          created_at: string
+          created_ip: string | null
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug?: string | null
+          phone?: string | null
+          email?: string | null
+          is_active?: boolean
+          is_founding?: boolean
+          created_at?: string
+          created_ip?: string | null
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string | null
+          phone?: string | null
+          email?: string | null
+          is_active?: boolean
+          is_founding?: boolean
+          created_at?: string
+          created_ip?: string | null
+          notes?: string | null
         }
         Relationships: []
       }
@@ -1737,6 +2065,7 @@ export type Database = {
           occupation: string | null
           workplace: string | null
           legal_capacity: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1755,6 +2084,7 @@ export type Database = {
           occupation?: string | null
           workplace?: string | null
           legal_capacity?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1773,6 +2103,7 @@ export type Database = {
           occupation?: string | null
           workplace?: string | null
           legal_capacity?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -1780,6 +2111,13 @@ export type Database = {
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opponents_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1804,6 +2142,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1824,6 +2163,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1844,13 +2184,14 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "payments_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "payments_client_id_fkey"
+            columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -1861,17 +2202,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "payments_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
             isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
           {
@@ -1882,10 +2216,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "payments_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: "payments_account_id_fkey"
+            columns: ["account_id"]
             isOneToOne: false
-            referencedRelation: "invoices"
+            referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
@@ -1893,6 +2227,20 @@ export type Database = {
             columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -1921,6 +2269,29 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_admins: {
+        Row: {
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       powers_of_attorney: {
         Row: {
           id: string
@@ -1938,6 +2309,7 @@ export type Database = {
           updated_at: string
           created_by: string | null
           deleted_at: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -1955,6 +2327,7 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -1972,15 +2345,9 @@ export type Database = {
           updated_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "powers_of_attorney_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "powers_of_attorney_client_id_fkey"
             columns: ["client_id"]
@@ -1989,8 +2356,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "powers_of_attorney_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "powers_of_attorney_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "powers_of_attorney_lawyer_id_fkey"
+            columns: ["lawyer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2003,10 +2377,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "powers_of_attorney_lawyer_id_fkey"
-            columns: ["lawyer_id"]
+            foreignKeyName: "powers_of_attorney_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "powers_of_attorney_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -2026,6 +2407,7 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string | null
+          office_id: string
         }
         Insert: {
           id: string
@@ -2041,6 +2423,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -2056,6 +2439,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -2072,6 +2456,13 @@ export type Database = {
             referencedRelation: "roles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       role_permissions: {
@@ -2079,18 +2470,28 @@ export type Database = {
           role_id: string
           permission_id: string
           created_at: string
+          office_id: string
         }
         Insert: {
           role_id: string
           permission_id: string
           created_at?: string
+          office_id?: string
         }
         Update: {
           role_id?: string
           permission_id?: string
           created_at?: string
+          office_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "role_permissions_permission_id_fkey"
             columns: ["permission_id"]
@@ -2099,10 +2500,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "role_permissions_role_id_fkey"
-            columns: ["role_id"]
+            foreignKeyName: "role_permissions_office_fk"
+            columns: ["office_id"]
             isOneToOne: false
-            referencedRelation: "roles"
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -2116,6 +2517,7 @@ export type Database = {
           is_system: boolean
           created_at: string
           updated_at: string
+          office_id: string
         }
         Insert: {
           id?: string
@@ -2125,6 +2527,7 @@ export type Database = {
           is_system?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
         Update: {
           id?: string
@@ -2134,8 +2537,17 @@ export type Database = {
           is_system?: boolean
           created_at?: string
           updated_at?: string
+          office_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "roles_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings: {
         Row: {
@@ -2163,6 +2575,7 @@ export type Database = {
           backup_frequency: string
           updated_at: string
           updated_by: string | null
+          office_id: string
         }
         Insert: {
           id?: boolean
@@ -2189,6 +2602,7 @@ export type Database = {
           backup_frequency?: string
           updated_at?: string
           updated_by?: string | null
+          office_id?: string
         }
         Update: {
           id?: boolean
@@ -2215,6 +2629,7 @@ export type Database = {
           backup_frequency?: string
           updated_at?: string
           updated_by?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -2222,6 +2637,13 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settings_office_fk"
+            columns: ["office_id"]
+            isOneToOne: true
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -2245,6 +2667,7 @@ export type Database = {
           updated_by: string | null
           deleted_at: string | null
           is_demo: boolean
+          office_id: string
         }
         Insert: {
           id?: string
@@ -2264,6 +2687,7 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Update: {
           id?: string
@@ -2283,15 +2707,9 @@ export type Database = {
           updated_by?: string | null
           deleted_at?: string | null
           is_demo?: boolean
+          office_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "tasks_assignee_id_fkey"
-            columns: ["assignee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tasks_case_id_fkey"
             columns: ["case_id"]
@@ -2304,6 +2722,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2320,6 +2745,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tasks_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       transactions: {
@@ -2334,6 +2766,7 @@ export type Database = {
           source_id: string | null
           created_at: string
           created_by: string | null
+          office_id: string
         }
         Insert: {
           id?: string
@@ -2346,6 +2779,7 @@ export type Database = {
           source_id?: string | null
           created_at?: string
           created_by?: string | null
+          office_id?: string
         }
         Update: {
           id?: string
@@ -2358,6 +2792,7 @@ export type Database = {
           source_id?: string | null
           created_at?: string
           created_by?: string | null
+          office_id?: string
         }
         Relationships: [
           {
@@ -2374,6 +2809,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transactions_office_fk"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_permissions: {
@@ -2382,20 +2824,30 @@ export type Database = {
           permission_id: string
           granted: boolean
           created_at: string
+          office_id: string
         }
         Insert: {
           user_id: string
           permission_id: string
           granted: boolean
           created_at?: string
+          office_id?: string
         }
         Update: {
           user_id?: string
           permission_id?: string
           granted?: boolean
           created_at?: string
+          office_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_permissions_permission_id_fkey"
             columns: ["permission_id"]
@@ -2404,10 +2856,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_permissions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "user_permissions_office_fk"
+            columns: ["office_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "offices"
             referencedColumns: ["id"]
           },
         ]
@@ -2432,6 +2884,10 @@ export type Database = {
         Returns: Json
       }
       create_office_user: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      current_office_id: {
         Args: Record<string, unknown>
         Returns: Json
       }
@@ -2467,6 +2923,10 @@ export type Database = {
         Args: Record<string, unknown>
         Returns: Json
       }
+      is_platform_admin: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
       is_super_admin: {
         Args: Record<string, unknown>
         Returns: Json
@@ -2479,7 +2939,31 @@ export type Database = {
         Args: Record<string, unknown>
         Returns: Json
       }
+      my_locked_profile: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
       my_permissions: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      office_public_info: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      platform_offices: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      platform_set_office_active: {
+        Args: Record<string, unknown>
+        Returns: undefined
+      }
+      platform_set_office_slug: {
+        Args: Record<string, unknown>
+        Returns: undefined
+      }
+      register_office: {
         Args: Record<string, unknown>
         Returns: Json
       }
@@ -2502,6 +2986,10 @@ export type Database = {
       soft_delete: {
         Args: Record<string, unknown>
         Returns: undefined
+      }
+      storage_object_office: {
+        Args: Record<string, unknown>
+        Returns: Json
       }
       touch_license_state: {
         Args: Record<string, unknown>

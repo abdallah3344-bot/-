@@ -38,7 +38,12 @@ function tsType(pg) {
   }
 }
 
-const auth = await fetch(`${URL}/auth/v1/token?grant_type=password`, {
+// للتوليد من نسخة محلية من القاعدة: SCHEMA_JSON=path/to/schema.json
+const fromFile = process.env.SCHEMA_JSON
+  ? JSON.parse((await import('node:fs')).readFileSync(process.env.SCHEMA_JSON, 'utf8'))
+  : null
+
+const auth = fromFile ? { access_token: 'file' } : await fetch(`${URL}/auth/v1/token?grant_type=password`, {
   method: 'POST',
   headers: { apikey: KEY, 'Content-Type': 'application/json' },
   body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
@@ -49,7 +54,7 @@ if (!auth.access_token) {
   process.exit(1)
 }
 
-const schema = await fetch(`${URL}/rest/v1/rpc/introspect_schema`, {
+const schema = fromFile ?? await fetch(`${URL}/rest/v1/rpc/introspect_schema`, {
   method: 'POST',
   headers: {
     apikey: KEY,

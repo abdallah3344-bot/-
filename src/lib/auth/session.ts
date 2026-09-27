@@ -15,6 +15,10 @@ export type CurrentUser = {
   avatarUrl: string | null
   roleCode: string
   roleName: string
+  /** المكتب الذي يتبعه المستخدم — كل بياناته محصورة فيه. */
+  officeId: string
+  /** مالك المنصة: يرى قائمة المكاتب المشتركة (أعداد فقط، لا بياناتها). */
+  isPlatformAdmin: boolean
   permissions: PermissionSet
 }
 
@@ -32,15 +36,17 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   if (!user) return null
 
-  const [{ data: profile }, { data: perms }] = await Promise.all([
+  const [{ data: profile }, { data: perms }, { data: platformAdmin }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, username, full_name, email, phone, job_title, avatar_url, is_active, roles(code, name_ar)')
+      .select('id, office_id, username, full_name, email, phone, job_title, avatar_url, is_active, roles(code, name_ar)')
       .eq('id', user.id)
       .maybeSingle(),
     supabase.rpc('my_permissions'),
+    supabase.rpc('is_platform_admin'),
   ])
 
+  // مكتب موقوف ⇒ سياسات العزل تحجب الملف الشخصي نفسه فيصل هنا null
   if (!profile || !profile.is_active) return null
 
   const role = (profile as { roles?: { code: string; name_ar: string } | null }).roles
@@ -55,6 +61,8 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     avatarUrl: profile.avatar_url,
     roleCode: role?.code ?? 'custom',
     roleName: role?.name_ar ?? 'غير محدّد',
+    officeId: profile.office_id,
+    isPlatformAdmin: platformAdmin === true,
     permissions: new PermissionSet(
       Array.isArray(perms) ? (perms as { code: string }[]).map((p) => p.code) : [],
     ),

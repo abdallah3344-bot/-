@@ -33,6 +33,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // القائمة تُبنى من صلاحيات المستخدم — لا روابط لا يستطيع فتحها.
   const items = NAVIGATION.filter((item) => user.permissions.canAccessModule(item.module))
+  if (user.isPlatformAdmin) {
+    items.push({ href: '/platform', label: 'المكاتب المشتركة', icon: 'Building2', module: 'settings', group: 'admin' })
+  }
 
   return (
     <AppShell

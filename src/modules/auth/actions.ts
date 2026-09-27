@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/audit'
+import { getHostOffice } from '@/lib/office-host'
 import {
   loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema,
 } from './schema'
@@ -58,6 +59,16 @@ export async function loginAction(_prev: unknown, formData: FormData): Promise<A
       summary: `محاولة دخول فاشلة بالمعرّف: ${identifier}`,
     })
     return { ok: false, error: INVALID_CREDENTIALS }
+  }
+
+  // رابط مكتب فرعي يقبل مستخدمي ذلك المكتب وحدهم
+  const hostOffice = await getHostOffice()
+  if (hostOffice) {
+    const { data: me } = await supabase.from('profiles').select('office_id').eq('email', email).maybeSingle()
+    if (me?.office_id !== hostOffice.id) {
+      await supabase.auth.signOut()
+      return { ok: false, error: 'هذا الحساب لا يتبع هذا المكتب. ادخل من رابط مكتبك.' }
+    }
   }
 
   await supabase

@@ -71,7 +71,8 @@ export async function saveTemplateAction(
       return { ok: false, error: 'حجم الملف يتجاوز 10 ميجابايت.', fieldErrors: { file: 'الملف كبير' } }
     }
 
-    filePath = `${crypto.randomUUID()}.docx`
+    // أول مجلد في المسار هو معرّف المكتب — سياسة التخزين ترفض غيره
+    filePath = `${guard.user.officeId}/${crypto.randomUUID()}.docx`
     fileName = file.name
     const { error } = await supabase.storage
       .from('templates')

@@ -100,7 +100,8 @@ export async function uploadDocumentAction(
   const folder = input.caseId ? `cases/${input.caseId}`
                : input.clientId ? `clients/${input.clientId}`
                : 'general'
-  const storagePath = `${folder}/${crypto.randomUUID()}.${extension}`
+  // أول مجلد في المسار هو معرّف المكتب — سياسة التخزين ترفض غيره
+  const storagePath = `${guard.user.officeId}/${folder}/${crypto.randomUUID()}.${extension}`
 
   const { error: uploadError } = await supabase.storage
     .from('documents')

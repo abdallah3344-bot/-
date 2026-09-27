@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /** المسارات العامة التي لا تتطلب تسجيل دخول. */
-const PUBLIC_ROUTES = ['/login', '/forgot-password', '/reset-password', '/auth']
+const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/auth']
 
 function isPublic(pathname: string) {
   return PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`))
