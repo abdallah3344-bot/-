@@ -7,7 +7,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "masri-law-office",
+  "name": "masri-law-office-test",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-09-01",
   "compatibility_flags": [
