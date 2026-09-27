@@ -63,10 +63,10 @@ export function RegisterForm() {
         <div className="flex items-center rounded-[var(--radius-app)] border border-input bg-background focus-within:ring-2 focus-within:ring-ring/40" dir="ltr">
           <Globe className="ms-3 size-4 shrink-0 text-muted-foreground" />
           <Input id="slug" name="slug" value={values.slug} onChange={set('slug')} maxLength={40}
-            className="border-0 px-2 text-start shadow-none focus-visible:ring-0" placeholder="alquds"
+            className="min-w-0 flex-1 border-0 bg-transparent px-2 text-start shadow-none focus-visible:ring-0 dark:bg-transparent" placeholder="alquds"
             autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-invalid={slugCheck.state === 'bad' || Boolean(err('slug'))} />
-          <span className="pe-3 text-sm text-muted-foreground">.masryps.com</span>
-          <span className="pe-3">
+          <span className="shrink-0 pe-2 text-sm text-muted-foreground">.masryps.com</span>
+          <span className="flex w-7 shrink-0 justify-center pe-2">
             {slugCheck.state === 'checking' ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
             {slugCheck.state === 'ok' ? <CheckCircle2 className="size-4 text-emerald-600" /> : null}
             {slugCheck.state === 'bad' ? <XCircle className="size-4 text-destructive" /> : null}
