@@ -15,10 +15,18 @@ grant execute on function public.t_assert(boolean, text) to public;
 set role anon;
 select set_config('request.jwt.claims', '{"role":"anon"}', false);
 select set_config('request.headers', '{"x-forwarded-for":"1.1.1.1"}', false);
-select t_assert((register_office('مكتب أ', 'مدير أ', 'admin_a', 'a@x.ps', 'Password1!', '0599000001') ->> 'ok')::boolean, 'تسجيل مكتب أ');
+select t_assert((register_office('مكتب أ', 'مدير أ', 'admin_a', 'a@x.ps', 'Password1!', '0599000001', 'Office-A') ->> 'ok')::boolean, 'تسجيل مكتب أ');
 select set_config('request.headers', '{"x-forwarded-for":"2.2.2.2"}', false);
 select t_assert((register_office('مكتب ب', 'مدير ب', 'admin_b', 'b@x.ps', 'Password1!', '0599000002') ->> 'ok')::boolean, 'تسجيل مكتب ب');
 select t_assert((register_office('مكتب ج', 'مدير ج', 'admin_b', 'c@x.ps', 'Password1!', '0599000003') ->> 'ok')::boolean = false, 'رفض اسم مستخدم مكرر');
+-- رابط الموقع: صيغة، حجز، تكرار — ولا يُنشأ مكتب عند رفض الرابط
+select t_assert((office_slug_available('office-a') ->> 'ok')::boolean = false, 'الرابط المستعمل غير متاح');
+select t_assert((office_slug_available('kamal') ->> 'ok')::boolean = false, 'رابط برنامج آخر محجوز');
+select t_assert((office_slug_available('a b') ->> 'ok')::boolean = false, 'رفض رابط بمسافة');
+select t_assert((office_slug_available('-ab') ->> 'ok')::boolean = false, 'رفض رابط يبدأ بشرطة');
+select t_assert((office_slug_available('alquds-law') ->> 'ok')::boolean, 'رابط جديد متاح');
+select t_assert((register_office('مكتب د', 'مدير د', 'admin_d', 'd@x.ps', 'Password1!', '0599000004', 'law') ->> 'field') = 'slug', 'رفض تسجيل برابط محجوز');
+select t_assert(not exists (select 1 from public.profiles where username = 'admin_d'), 'لا حساب عند رفض الرابط');
 -- الزائر: إما لا صلاحية له على الجدول أصلًا (الإنتاج) أو لا يرى صفًا
 do $$ declare _n bigint; begin
   begin select count(*) into _n from public.clients; exception when insufficient_privilege then _n := 0; end;
@@ -36,6 +44,8 @@ select set_config('t.oa', (select office_id::text from public.profiles where use
 select set_config('t.ob', (select office_id::text from public.profiles where username = 'admin_b'), false);
 select set_config('t.uf', (select id::text from public.profiles where username = 'admin'), false);
 
+select t_assert((select slug || ':' || domain_status from public.offices where id = current_setting('t.oa')::uuid) = 'office-a:pending', 'رابط مكتب أ محفوظ بانتظار الربط');
+select t_assert((select domain_status from public.offices where id = current_setting('t.ob')::uuid) = 'none', 'مكتب بلا رابط');
 select t_assert((select count(*) from public.roles where office_id = current_setting('t.oa')::uuid)
               = (select count(*) from public.roles r join public.offices o on o.id = r.office_id where o.is_founding), 'نُسخت الأدوار');
 select t_assert((select count(*) from public.courts where office_id = current_setting('t.oa')::uuid) > 0, 'نُسخت المحاكم');
@@ -230,7 +240,26 @@ insert into public.clients (name, client_type) values ('موكّل المكتب 
 select t_assert((select count(*) from public.clients) = current_setting('t.fc')::int + 1, 'المكتب الأول يرى موكّليه فقط');
 select t_assert((select count(*) from public.clients where name like '%مكتب أ%' or name = 'موكّل ب') = 0, 'المكتب الأول لا يرى موكّلي أ و ب');
 update public.profiles set full_name = full_name where id = auth.uid();
+-- المالك يغيّر الروابط، وحالة الربط تُحدَّث للرابط الحالي فقط
+select t_assert((platform_set_office_slug(current_setting('t.ob')::uuid, 'office-a') ->> 'ok')::boolean = false, 'المالك لا يكرر رابطًا');
+select t_assert((platform_set_office_slug(current_setting('t.ob')::uuid, 'office-b') ->> 'ok')::boolean, 'المالك يعطي مكتب ب رابطًا');
+select set_office_domain_status(current_setting('t.ob')::uuid, 'office-b', 'active');
+select set_office_domain_status(current_setting('t.ob')::uuid, 'old-slug', 'failed', 'قديم');
+select t_assert((select domain_status from platform_offices() where id = current_setting('t.ob')::uuid) = 'active', 'حالة الربط تظهر للمالك');
 reset role;
+-- مدير مكتب أ لا يغيّر حالة رابط مكتب ب ولا يغيّر الروابط
+set role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.ua'), 'role', 'authenticated')::text, false);
+do $$ begin
+  begin perform set_office_domain_status(current_setting('t.ob')::uuid, 'office-b', 'failed');
+    perform t_assert(false, 'مكتب يغيّر حالة رابط مكتب آخر'); exception when insufficient_privilege then null; end;
+  begin perform platform_set_office_slug(current_setting('t.oa')::uuid, 'zzz');
+    perform t_assert(false, 'مكتب يغيّر رابطه عبر دالة المالك'); exception when insufficient_privilege then null; end;
+end $$;
+select set_office_domain_status(current_setting('t.oa')::uuid, 'office-a', 'active');
+select t_assert(true, 'مدير المكتب يسجّل حالة ربط رابطه');
+reset role;
+select t_assert((select domain_status from public.offices where id = current_setting('t.ob')::uuid) = 'active', 'حالة رابط ب لم تتغيّر');
 
 -- المكتب الأول: بياناته القديمة كلها له
 select t_assert((select count(*) from public.clients where office_id is null) = 0, 'لا موكّل بلا مكتب');

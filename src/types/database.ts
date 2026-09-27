@@ -2020,6 +2020,8 @@ export type Database = {
           created_at: string
           created_ip: string | null
           notes: string | null
+          domain_status: string
+          domain_error: string | null
         }
         Insert: {
           id?: string
@@ -2960,6 +2962,18 @@ export type Database = {
         Returns: undefined
       }
       platform_set_office_slug: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      office_slug_available: {
+        Args: Record<string, unknown>
+        Returns: Json
+      }
+      office_slug_reserved: {
+        Args: Record<string, unknown>
+        Returns: boolean
+      }
+      set_office_domain_status: {
         Args: Record<string, unknown>
         Returns: undefined
       }

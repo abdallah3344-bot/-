@@ -4,6 +4,11 @@ import { z } from 'zod'
 export const registerOfficeSchema = z
   .object({
     officeName: z.string().trim().min(2, 'أدخل اسم المكتب').max(120, 'الاسم طويل جدًا'),
+    slug: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/, 'أحرف إنجليزية صغيرة وأرقام وشرطة في الوسط، 3 أحرف على الأقل'),
     fullName: z.string().trim().min(2, 'أدخل اسم مدير المكتب'),
     phone: z
       .string()
