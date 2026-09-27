@@ -1,14 +1,36 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/auth/session'
 import { registerOfficeSchema, officeSlugSchema } from './schema'
+import { attachOfficeDomain, detachOfficeDomain, officeHost } from '@/lib/cloudflare-domains'
 
 export type RegisterResult =
-  | { ok: true }
+  | { ok: true; done?: { site: string; signedIn: boolean } }
   | { ok: false; error: string; fieldErrors?: Record<string, string> }
+
+/** فحص فوري لرابط المكتب أثناء الكتابة في صفحة التسجيل. */
+export async function checkOfficeSlugAction(slug: string): Promise<{ ok: boolean; error?: string }> {
+  const parsed = officeSlugSchema.safeParse(slug)
+  if (!parsed.success || !parsed.data) return { ok: false, error: parsed.error?.issues[0]?.message ?? 'أدخل الرابط' }
+  const supabase = await createClient()
+  const { data } = await supabase.rpc('office_slug_available', { _slug: parsed.data } as never)
+  return (data as { ok: boolean; error?: string } | null) ?? { ok: false, error: 'تعذّر الفحص الآن' }
+}
+
+/** يطلب من Cloudflare ربط الرابط ويسجّل النتيجة لتظهر في صفحة المالك. */
+async function linkOfficeDomain(officeId: string, slug: string) {
+  const res = await attachOfficeDomain(slug)
+  const supabase = await createClient()
+  await supabase.rpc('set_office_domain_status', {
+    _office: officeId,
+    _slug: slug,
+    _status: res.ok ? 'active' : res.notConfigured ? 'pending' : 'failed',
+    _error: res.ok ? null : res.error,
+  } as never)
+  return res
+}
 
 /**
  * تسجيل مكتب جديد: القاعدة تنشئ المكتب ومديره وتجهّز أدواره وقوائمه،
@@ -36,26 +58,28 @@ export async function registerOfficeAction(_prev: unknown, formData: FormData): 
     _email: v.email,
     _password: v.password,
     _phone: v.phone,
+    _slug: v.slug,
   } as never)
 
   if (error) return { ok: false, error: 'تعذّر تسجيل المكتب الآن. حاول بعد قليل.' }
-  const result = data as { ok: boolean; error?: string } | null
-  if (!result?.ok) return { ok: false, error: result?.error ?? 'تعذّر تسجيل المكتب.' }
+  const result = data as { ok: boolean; error?: string; field?: string; office_id?: string } | null
+  if (!result?.ok) {
+    const error = result?.error ?? 'تعذّر تسجيل المكتب.'
+    return result?.field ? { ok: false, error, fieldErrors: { [result.field]: error } } : { ok: false, error }
+  }
 
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: v.email,
     password: v.password,
   })
-  if (signInError) {
-    // المكتب أُنشئ؛ الدخول اليدوي يكفي
-    redirect('/login?registered=1')
-  }
+  // الربط بعد الدخول: تسجيل حالته يحتاج أن يكون المستخدم مدير المكتب
+  if (!signInError && result.office_id) await linkOfficeDomain(result.office_id, v.slug)
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  return { ok: true, done: { site: officeHost(v.slug), signedIn: !signInError } }
 }
 
-export type PlatformResult = { ok: true } | { ok: false; error: string }
+export type PlatformResult = { ok: true; warning?: string } | { ok: false; error: string }
 
 async function requirePlatformAdmin() {
   const user = await getCurrentUser()
@@ -75,14 +99,28 @@ export async function setOfficeSlugAction(officeId: string, slug: string): Promi
   if (!(await requirePlatformAdmin())) return { ok: false, error: 'هذه العملية لمالك المنصة فقط.' }
   const parsed = officeSlugSchema.safeParse(slug)
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'رابط غير صالح' }
-  if (['law', 'www', 'kamal', 'alaraj', 'alnoor', 'almayar', 'demo', 'insurance', 'thaqafi'].includes(parsed.data)) {
-    return { ok: false, error: 'هذا الاسم محجوز لبرنامج آخر.' }
-  }
   const supabase = await createClient()
-  const { error } = await supabase.rpc('platform_set_office_slug', { _office: officeId, _slug: parsed.data } as never)
+  const { data, error } = await supabase.rpc('platform_set_office_slug', { _office: officeId, _slug: parsed.data } as never)
   if (error) {
     return { ok: false, error: error.code === '23505' ? 'هذا الرابط مستخدم لمكتب آخر.' : error.message }
   }
+  const r = data as { ok: boolean; error?: string; old: string | null; new: string | null }
+  if (!r.ok) return { ok: false, error: r.error ?? 'تعذّر حفظ الرابط' }
+
+  let warning: string | undefined
+  if (r.new && r.new !== r.old) {
+    const res = await linkOfficeDomain(officeId, r.new)
+    if (!res.ok) warning = res.error
+  }
+  if (r.old && r.old !== r.new) await detachOfficeDomain(r.old)
   revalidatePath('/platform')
-  return { ok: true }
+  return { ok: true, warning }
+}
+
+/** إعادة محاولة ربط رابط فشل أو بقي بانتظار الربط. */
+export async function retryOfficeDomainAction(officeId: string, slug: string): Promise<PlatformResult> {
+  if (!(await requirePlatformAdmin())) return { ok: false, error: 'هذه العملية لمالك المنصة فقط.' }
+  const res = await linkOfficeDomain(officeId, slug)
+  revalidatePath('/platform')
+  return res.ok ? { ok: true } : { ok: false, error: res.error }
 }

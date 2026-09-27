@@ -29,6 +29,8 @@ type OfficeRow = {
   license_state: string | null
   license_checked_at: string | null
   admin_username: string | null
+  domain_status: string
+  domain_error: string | null
 }
 
 const LICENSE_TONE: Record<string, 'success' | 'warning' | 'danger' | 'muted'> = {
@@ -118,7 +120,7 @@ export default async function PlatformPage() {
                       {o.last_activity ? timeAgo(o.last_activity) : '—'}
                     </TableCell>
                     <TableCell>
-                      <OfficeSlugEditor officeId={o.id} slug={o.slug} />
+                      <OfficeSlugEditor officeId={o.id} slug={o.slug} status={o.domain_status} error={o.domain_error} />
                     </TableCell>
                     <TableCell className="text-center">
                       <OfficeActiveSwitch officeId={o.id} active={o.is_active} locked={o.is_founding} />

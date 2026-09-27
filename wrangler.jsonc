@@ -33,6 +33,18 @@
     "binding": "ASSETS",
     "directory": ".open-next/assets"
   },
+  /**
+   * ربط رابط كل مكتب (<slug>.masryps.com) تلقائيًا — src/lib/cloudflare-domains.ts.
+   * المفتاح نفسه سرّ يُضاف من لوحة Cloudflare: Settings ← Variables and Secrets
+   * باسم CF_API_TOKEN (لا يُكتب هنا).
+   */
+  // keep_vars: لا تمسح متغيرات أضيفت من اللوحة عند كل نشر
+  "keep_vars": true,
+  "vars": {
+    "CF_ACCOUNT_ID": "684ba792ce69017f95cf59070c35b346",
+    "CF_ZONE_ID": "d7ce02a8903c9026c2a179b7aecce546",
+    "CF_WORKER_NAME": "masri-law-office"
+  },
   "observability": {
     "enabled": true
   }

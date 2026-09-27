@@ -2,11 +2,11 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Loader2, Link2 } from 'lucide-react'
+import { Loader2, Link2, RefreshCw, ExternalLink } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { setOfficeActiveAction, setOfficeSlugAction } from '../actions'
+import { setOfficeActiveAction, setOfficeSlugAction, retryOfficeDomainAction } from '../actions'
 
 export function OfficeActiveSwitch({ officeId, active, locked }: { officeId: string; active: boolean; locked: boolean }) {
   const [pending, start] = useTransition()
@@ -26,20 +26,30 @@ export function OfficeActiveSwitch({ officeId, active, locked }: { officeId: str
   )
 }
 
-export function OfficeSlugEditor({ officeId, slug }: { officeId: string; slug: string | null }) {
+const DOMAIN_LABEL: Record<string, { text: string; cls: string }> = {
+  active: { text: 'يعمل', cls: 'text-emerald-700 dark:text-emerald-400' },
+  pending: { text: 'بانتظار الربط', cls: 'text-amber-700 dark:text-amber-400' },
+  failed: { text: 'فشل الربط', cls: 'text-destructive' },
+}
+
+export function OfficeSlugEditor({ officeId, slug, status, error }: {
+  officeId: string; slug: string | null; status: string; error: string | null
+}) {
   const [value, setValue] = useState(slug ?? '')
   const [pending, start] = useTransition()
   const dirty = value.trim().toLowerCase() !== (slug ?? '')
 
   return (
+    <div className="space-y-1">
     <form
       className="flex items-center gap-1.5"
       onSubmit={(e) => {
         e.preventDefault()
         start(async () => {
           const res = await setOfficeSlugAction(officeId, value)
-          if (res.ok) toast.success(value ? `الرابط: ${value}.masryps.com` : 'أُزيل الرابط الخاص')
-          else toast.error(res.error)
+          if (!res.ok) toast.error(res.error)
+          else if (res.warning) toast.warning(`حُفظ الرابط لكن لم يُربط: ${res.warning}`)
+          else toast.success(value ? `الرابط: ${value}.masryps.com` : 'أُزيل الرابط الخاص')
         })
       }}
     >
@@ -60,5 +70,26 @@ export function OfficeSlugEditor({ officeId, slug }: { officeId: string; slug: s
         </Button>
       ) : null}
     </form>
+    {slug && !dirty ? (
+      <div className="flex items-center gap-2 text-xs">
+        <span className={DOMAIN_LABEL[status]?.cls} title={error ?? undefined}>{DOMAIN_LABEL[status]?.text ?? status}</span>
+        {status === 'active' ? (
+          <a href={`https://${slug}.masryps.com`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-muted-foreground hover:text-foreground">
+            فتح <ExternalLink className="size-3" />
+          </a>
+        ) : (
+          <button type="button" disabled={pending} className="inline-flex items-center gap-0.5 text-muted-foreground hover:text-foreground"
+            onClick={() => start(async () => {
+              const res = await retryOfficeDomainAction(officeId, slug)
+              if (res.ok) toast.success('رُبط الرابط — يعمل خلال دقيقة أو دقيقتين')
+              else toast.error(res.error)
+            })}>
+            <RefreshCw className="size-3" /> ربط الآن
+          </button>
+        )}
+      </div>
+    ) : null}
+    {slug && !dirty && status === 'failed' && error ? <p className="max-w-56 text-[11px] text-destructive">{error}</p> : null}
+    </div>
   )
 }
