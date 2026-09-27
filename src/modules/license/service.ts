@@ -183,6 +183,12 @@ export const getLicenseStatus = cache(async (): Promise<LicenseStatus> => {
   const data = result.data
   const state = data.state ?? 'unknown'
 
+  // تسجيل آخر حالة لتظهر في صفحة المكاتب المشتركة — عند التغيّر فقط
+  if (state !== inputs.lastState) {
+    const supabase = await createClient()
+    await supabase.rpc('touch_license_state', { p_state: state, p_message: data.message ?? null } as never)
+  }
+
   return {
     allowed: data.ok === true && (VALID_STATES as readonly string[]).includes(state),
     state,

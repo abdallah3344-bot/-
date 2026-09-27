@@ -56,7 +56,7 @@ export default async function PlatformPage() {
   const offices = (data ?? []) as OfficeRow[]
 
   const active = offices.filter((o) => o.is_active).length
-  const pending = offices.filter((o) => o.license_state === 'trial_pending' || o.license_state === 'not_activated' || !o.license_state).length
+  const pending = offices.filter((o) => o.license_state === 'trial_pending' || o.license_state === 'device_pending').length
 
   return (
     <>
@@ -111,7 +111,7 @@ export default async function PlatformPage() {
                     <TableCell className="text-center tabular-nums">{o.cases_count}</TableCell>
                     <TableCell>
                       <Badge variant={LICENSE_TONE[o.license_state ?? ''] ?? 'muted'}>
-                        {LICENSE_STATE_LABELS[o.license_state ?? ''] ?? 'لم يُفحص بعد'}
+                        {o.license_state ? (LICENSE_STATE_LABELS[o.license_state] ?? o.license_state) : 'لم يدخل بعد'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
