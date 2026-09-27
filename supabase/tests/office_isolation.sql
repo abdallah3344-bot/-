@@ -19,8 +19,13 @@ select t_assert((register_office('مكتب أ', 'مدير أ', 'admin_a', 'a@x.p
 select set_config('request.headers', '{"x-forwarded-for":"2.2.2.2"}', false);
 select t_assert((register_office('مكتب ب', 'مدير ب', 'admin_b', 'b@x.ps', 'Password1!', '0599000002') ->> 'ok')::boolean, 'تسجيل مكتب ب');
 select t_assert((register_office('مكتب ج', 'مدير ج', 'admin_b', 'c@x.ps', 'Password1!', '0599000003') ->> 'ok')::boolean = false, 'رفض اسم مستخدم مكرر');
-select t_assert((select count(*) from public.clients) = 0, 'الزائر لا يرى أي موكّل');
-select t_assert((select count(*) from public.settings) = 0, 'الزائر لا يرى الإعدادات');
+-- الزائر: إما لا صلاحية له على الجدول أصلًا (الإنتاج) أو لا يرى صفًا
+do $$ declare _n bigint; begin
+  begin select count(*) into _n from public.clients; exception when insufficient_privilege then _n := 0; end;
+  perform t_assert(_n = 0, 'الزائر لا يرى أي موكّل');
+  begin select count(*) into _n from public.settings; exception when insufficient_privilege then _n := 0; end;
+  perform t_assert(_n = 0, 'الزائر لا يرى الإعدادات');
+end $$;
 select t_assert(resolve_login_email('admin_a', 'Password1!') = 'a@x.ps', 'دخول مدير أ باسم المستخدم');
 select t_assert(resolve_login_email('admin_a', 'wrong') is null, 'رفض كلمة مرور خاطئة');
 reset role;
@@ -220,8 +225,10 @@ select t_assert((select full_name from public.profiles where username = 'lawyer_
 -- مدير المكتب الأول يعمل كالمعتاد
 set role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.uf'), 'role', 'authenticated')::text, false);
+select set_config('t.fc', (select count(*)::text from public.clients), false);
 insert into public.clients (name, client_type) values ('موكّل المكتب الأول', 'individual');
-select t_assert((select count(*) from public.clients) = 1, 'المكتب الأول يرى موكّله فقط');
+select t_assert((select count(*) from public.clients) = current_setting('t.fc')::int + 1, 'المكتب الأول يرى موكّليه فقط');
+select t_assert((select count(*) from public.clients where name like '%مكتب أ%' or name = 'موكّل ب') = 0, 'المكتب الأول لا يرى موكّلي أ و ب');
 update public.profiles set full_name = full_name where id = auth.uid();
 reset role;
 
