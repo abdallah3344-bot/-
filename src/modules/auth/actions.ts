@@ -50,7 +50,7 @@ export async function loginAction(_prev: unknown, formData: FormData): Promise<A
     return { ok: false, error: INVALID_CREDENTIALS }
   }
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+  const { data: signIn, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
   if (signInError) {
     await logAudit({
@@ -64,7 +64,7 @@ export async function loginAction(_prev: unknown, formData: FormData): Promise<A
   // رابط مكتب فرعي يقبل مستخدمي ذلك المكتب وحدهم
   const hostOffice = await getHostOffice()
   if (hostOffice) {
-    const { data: me } = await supabase.from('profiles').select('office_id').eq('email', email).maybeSingle()
+    const { data: me } = await supabase.from('profiles').select('office_id').eq('id', signIn.user.id).maybeSingle()
     if (me?.office_id !== hostOffice.id) {
       await supabase.auth.signOut()
       return { ok: false, error: 'هذا الحساب لا يتبع هذا المكتب. ادخل من رابط مكتبك.' }
@@ -74,7 +74,7 @@ export async function loginAction(_prev: unknown, formData: FormData): Promise<A
   await supabase
     .from('profiles')
     .update({ last_login_at: new Date().toISOString() })
-    .eq('email', email)
+    .eq('id', signIn.user.id)
 
   await logAudit({ action: 'login', entity: 'auth', summary: 'تسجيل دخول ناجح' })
 

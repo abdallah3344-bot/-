@@ -37,6 +37,18 @@ end $$;
 select t_assert(resolve_login_email('admin_a', 'Password1!') = 'a@x.ps', 'دخول مدير أ باسم المستخدم');
 select t_assert(resolve_login_email('admin_a', 'wrong') is null, 'رفض كلمة مرور خاطئة');
 reset role;
+update public.profiles set email = 'A.New@x.ps' where username = 'admin_a';
+select t_assert((select u.email from auth.users u join public.profiles p on p.id = u.id where p.username = 'admin_a') = 'a.new@x.ps', 'تغيير البريد ينتقل إلى حساب الدخول');
+set role anon;
+select t_assert(resolve_login_email('admin_a', 'Password1!') = 'a.new@x.ps', 'الدخول باسم المستخدم بعد تغيير البريد');
+reset role;
+update public.profiles set email = 'a@x.ps' where username = 'admin_a';
+do $$ begin
+  begin update public.profiles set email = 'b@x.ps' where username = 'admin_a';
+    perform t_assert(false, 'بريد مكرر يُقبل'); exception when unique_violation then null; end;
+end $$;
+set role anon;
+reset role;
 
 select set_config('t.ua', (select id::text from public.profiles where username = 'admin_a'), false);
 select set_config('t.ub', (select id::text from public.profiles where username = 'admin_b'), false);
