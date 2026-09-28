@@ -127,7 +127,9 @@ export function UserForm({ roles, mode, defaults, isSelf }: Props) {
             name="roleCode" label="الدور" required error={err('roleCode')}
             hint={isSelf ? 'لا يمكنك تغيير دور حسابك الشخصي' : undefined}
           >
-            <Select name="roleCode" defaultValue={defaults?.roleCode ?? 'lawyer'} disabled={isSelf}>
+            {/* الحقل المعطَّل لا يُرسل مع النموذج — نرسل القيمة الحالية مخفيّة */}
+            {isSelf ? <input type="hidden" name="roleCode" value={defaults?.roleCode ?? ''} /> : null}
+            <Select name={isSelf ? undefined : 'roleCode'} defaultValue={defaults?.roleCode ?? 'lawyer'} disabled={isSelf}>
               <SelectTrigger id="roleCode" aria-invalid={Boolean(err('roleCode'))}>
                 <SelectValue placeholder="اختر الدور" />
               </SelectTrigger>
@@ -145,8 +147,9 @@ export function UserForm({ roles, mode, defaults, isSelf }: Props) {
             <div className="space-y-2">
               <Label htmlFor="isActive">حالة الحساب</Label>
               <div className="flex h-10 items-center gap-3">
+                {isSelf ? <input type="hidden" name="isActive" value="on" /> : null}
                 <Switch
-                  id="isActive" name="isActive"
+                  id="isActive" name={isSelf ? undefined : 'isActive'}
                   defaultChecked={defaults?.isActive ?? true}
                   disabled={isSelf}
                 />
