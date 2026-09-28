@@ -246,6 +246,7 @@ select t_assert((platform_set_office_slug(current_setting('t.ob')::uuid, 'office
 select set_office_domain_status(current_setting('t.ob')::uuid, 'office-b', 'active');
 select set_office_domain_status(current_setting('t.ob')::uuid, 'old-slug', 'failed', 'قديم');
 select t_assert((select domain_status from platform_offices() where id = current_setting('t.ob')::uuid) = 'active', 'حالة الربط تظهر للمالك');
+select t_assert((select ops_week >= 1 and logins_week >= 0 and hearings_count >= 0 from platform_offices() where id = current_setting('t.oa')::uuid), 'مؤشرات نشاط مكتب أ تظهر للمالك');
 reset role;
 -- مدير مكتب أ لا يغيّر حالة رابط مكتب ب ولا يغيّر الروابط
 set role authenticated;

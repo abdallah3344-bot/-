@@ -31,6 +31,11 @@ type OfficeRow = {
   admin_username: string | null
   domain_status: string
   domain_error: string | null
+  hearings_count: number
+  invoices_count: number
+  ops_today: number
+  ops_week: number
+  logins_week: number
 }
 
 const LICENSE_TONE: Record<string, 'success' | 'warning' | 'danger' | 'muted'> = {
@@ -59,17 +64,20 @@ export default async function PlatformPage() {
 
   const active = offices.filter((o) => o.is_active).length
   const pending = offices.filter((o) => o.license_state === 'trial_pending' || o.license_state === 'device_pending').length
+  const workingThisWeek = offices.filter((o) => Number(o.ops_week) > 0).length
 
   return (
     <>
       <PageHeader
         title="المكاتب المشتركة"
-        description="كل مكتب يعمل على بياناته وحده. هنا الأعداد وحالة الترخيص فقط، ولا تظهر بيانات أي مكتب."
+        description="كل مكتب يعمل على بياناته وحده. هنا الأعداد والنشاط وحالة الترخيص فقط، ولا تظهر بيانات أي مكتب. العمليات = إضافة أو تعديل أو حذف أو رفع مستند."
       />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="كل المكاتب" value={offices.length} icon="Building2" />
         <StatCard label="مكاتب فعّالة" value={active} icon="ShieldCheck" tone="success" />
+        <StatCard label="يعملون هذا الأسبوع" value={workingThisWeek} icon="History" tone="success"
+          hint="مكاتب أدخلت أو عدّلت بيانات خلال 7 أيام" />
         <StatCard label="بانتظار اعتماد الترخيص" value={pending} icon="Bell" tone={pending ? 'warning' : 'default'}
           hint="اعتمدها من لوحة التراخيص" />
       </div>
@@ -85,6 +93,11 @@ export default async function PlatformPage() {
                   <TableHead className="text-center">المستخدمون</TableHead>
                   <TableHead className="text-center">الموكّلون</TableHead>
                   <TableHead className="text-center">القضايا</TableHead>
+                  <TableHead className="text-center">الجلسات</TableHead>
+                  <TableHead className="text-center">الفواتير</TableHead>
+                  <TableHead className="text-center">عمليات اليوم</TableHead>
+                  <TableHead className="text-center">عمليات الأسبوع</TableHead>
+                  <TableHead className="text-center">دخول الأسبوع</TableHead>
                   <TableHead>الترخيص</TableHead>
                   <TableHead>آخر نشاط</TableHead>
                   <TableHead>الرابط الخاص</TableHead>
@@ -111,6 +124,15 @@ export default async function PlatformPage() {
                     <TableCell className="text-center tabular-nums">{o.users_count}</TableCell>
                     <TableCell className="text-center tabular-nums">{o.clients_count}</TableCell>
                     <TableCell className="text-center tabular-nums">{o.cases_count}</TableCell>
+                    <TableCell className="text-center tabular-nums">{o.hearings_count}</TableCell>
+                    <TableCell className="text-center tabular-nums">{o.invoices_count}</TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {Number(o.ops_today) > 0 ? <Badge variant="success">{o.ops_today}</Badge> : <span className="text-muted-foreground">0</span>}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {Number(o.ops_week) > 0 ? o.ops_week : <span className="text-muted-foreground">0</span>}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">{o.logins_week}</TableCell>
                     <TableCell>
                       <Badge variant={LICENSE_TONE[o.license_state ?? ''] ?? 'muted'}>
                         {o.license_state ? (LICENSE_STATE_LABELS[o.license_state] ?? o.license_state) : 'لم يدخل بعد'}
