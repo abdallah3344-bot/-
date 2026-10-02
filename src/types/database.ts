@@ -2977,6 +2977,10 @@ export type Database = {
         Args: Record<string, unknown>
         Returns: undefined
       }
+      remember_license_key: {
+        Args: Record<string, unknown>
+        Returns: undefined
+      }
       register_office: {
         Args: Record<string, unknown>
         Returns: Json
