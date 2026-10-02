@@ -185,11 +185,13 @@ async function nameDeviceOnce(licenseKey: string, deviceId: string) {
 
 /** أجهزة ترخيص المكتب — تُعرض للمكتب نفسه في الإعدادات. */
 export async function getLicenseDevices(): Promise<LicenseDevices | null> {
-  const [inputs, device] = await Promise.all([getLicenseInputs(), getBrowserDeviceId()])
-  if (!inputs?.licenseKey || !device) return null
+  // بعد التحقق: قد يكون المفتاح تحدّث للتو في هذا الطلب نفسه
+  const status = await getLicenseStatus()
+  const device = await getBrowserDeviceId()
+  if (!status.licenseKey || !device) return null
   const data = await licenseRpc<{ ok: boolean; max_devices: number; used: number; devices: LicenseDevice[] }>(
     'client_license_devices',
-    { p_program: LICENSE_PROGRAM, p_license_key: inputs.licenseKey, p_device_id: device },
+    { p_program: LICENSE_PROGRAM, p_license_key: status.licenseKey, p_device_id: device },
   )
   if (!data?.ok) return null
   return { maxDevices: data.max_devices, used: data.used, devices: data.devices ?? [] }
