@@ -44,6 +44,48 @@ function nullable(value: FormDataEntryValue | null): string {
   return text === '__none__' ? '' : text
 }
 
+function documentFolder(officeId: string, caseId?: string, clientId?: string) {
+  const sub = caseId ? `cases/${caseId}` : clientId ? `clients/${clientId}` : 'general'
+  return `${officeId}/${sub}`
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * الخطوة الأولى للرفع: رابط رفع موقّع لمسار يحدّده الخادم.
+ *
+ * الملف يذهب من المتصفح إلى التخزين مباشرة ولا يمرّ بالخادم: طلبات
+ * إجراءات الخادم محدودة بـ 1 ميجابايت، وذاكرة الـ Worker محدودة، فكان
+ * أي مستند أكبر من 1 ميجابايت يفشل. سياسات التخزين (الصلاحية ومجلد
+ * المكتب) تبقى مفروضة لأن الرابط يُنشأ بجلسة المستخدم.
+ */
+export async function prepareDocumentUploadAction(input: {
+  mime: string
+  size: number
+  caseId?: string
+  clientId?: string
+}): Promise<{ ok: true; path: string; token: string } | { ok: false; error: string }> {
+  const guard = await checkPermission('documents', 'create')
+  if (!guard.ok) return { ok: false, error: guard.error }
+  if (!ALLOWED_MIME.has(input.mime)) {
+    return { ok: false, error: 'نوع الملف غير مدعوم. المسموح: PDF و Word و Excel وصور JPG/PNG/WEBP.' }
+  }
+  if (!(input.size > 0) || input.size > MAX_SIZE) {
+    return { ok: false, error: 'حجم الملف يتجاوز 50 ميجابايت.' }
+  }
+  const caseId = input.caseId && UUID_RE.test(input.caseId) ? input.caseId : undefined
+  const clientId = input.clientId && UUID_RE.test(input.clientId) ? input.clientId : undefined
+
+  // مسار التخزين لا يستخدم اسم الملف الأصلي إطلاقًا:
+  // قد يحتوي محارف مسار أو عربية تكسر التخزين، وقد يكشف معلومات.
+  const path = `${documentFolder(guard.user.officeId, caseId, clientId)}/${crypto.randomUUID()}.${EXTENSION_BY_MIME[input.mime] ?? 'bin'}`
+  const supabase = await createClient()
+  const { data, error } = await supabase.storage.from('documents').createSignedUploadUrl(path)
+  if (error || !data) return { ok: false, error: `تعذّر تجهيز الرفع: ${error?.message ?? ''}` }
+  return { ok: true, path, token: data.token }
+}
+
+/** الخطوة الثانية: تسجيل المستند بعد وصول الملف إلى التخزين. */
 export async function uploadDocumentAction(
   _prev: unknown,
   formData: FormData,
@@ -51,30 +93,13 @@ export async function uploadDocumentAction(
   const guard = await checkPermission('documents', 'create')
   if (!guard.ok) return { ok: false, error: guard.error }
 
-  const file = formData.get('file')
-  if (!(file instanceof File) || file.size === 0) {
+  const storagePath = String(formData.get('storagePath') ?? '')
+  if (!storagePath) {
     return { ok: false, error: 'اختر ملفًا للرفع.', fieldErrors: { file: 'الملف مطلوب' } }
   }
 
-  // التحقق من الملف قبل أي كتابة — النوع والحجم.
-  if (!ALLOWED_MIME.has(file.type)) {
-    return {
-      ok: false,
-      error: 'نوع الملف غير مدعوم. المسموح: PDF و Word و Excel وصور JPG/PNG/WEBP.',
-      fieldErrors: { file: 'نوع ملف غير مدعوم' },
-    }
-  }
-
-  if (file.size > MAX_SIZE) {
-    return {
-      ok: false,
-      error: 'حجم الملف يتجاوز 50 ميجابايت.',
-      fieldErrors: { file: 'الملف كبير جدًا' },
-    }
-  }
-
   const parsed = uploadSchema.safeParse({
-    name: formData.get('name') || file.name,
+    name: formData.get('name') || String(formData.get('fileName') ?? ''),
     categoryId: nullable(formData.get('categoryId')),
     caseId: nullable(formData.get('caseId')),
     clientId: nullable(formData.get('clientId')),
@@ -94,22 +119,21 @@ export async function uploadDocumentAction(
   const input = parsed.data
   const supabase = await createClient()
 
-  // مسار التخزين لا يستخدم اسم الملف الأصلي إطلاقًا:
-  // قد يحتوي محارف مسار أو عربية تكسر التخزين، وقد يكشف معلومات.
-  const extension = EXTENSION_BY_MIME[file.type] ?? 'bin'
-  const folder = input.caseId ? `cases/${input.caseId}`
-               : input.clientId ? `clients/${input.clientId}`
-               : 'general'
-  // أول مجلد في المسار هو معرّف المكتب — سياسة التخزين ترفض غيره
-  const storagePath = `${guard.user.officeId}/${folder}/${crypto.randomUUID()}.${extension}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('documents')
-    .upload(storagePath, file, { contentType: file.type, upsert: false })
-
-  if (uploadError) {
-    return { ok: false, error: `تعذّر رفع الملف: ${uploadError.message}` }
+  // المسار يجب أن يكون الذي أعطاه الخادم: داخل مجلد المكتب والقضية/العميل
+  const folder = documentFolder(guard.user.officeId, input.caseId || undefined, input.clientId || undefined)
+  const fileName = storagePath.slice(folder.length + 1)
+  if (!storagePath.startsWith(`${folder}/`) || !/^[0-9a-f-]{36}\.[a-z]{2,4}$/.test(fileName)) {
+    return { ok: false, error: 'مسار الملف غير صالح. أعد المحاولة.' }
   }
+
+  // الحجم والنوع الحقيقيان من التخزين نفسه — لا من المتصفح
+  const { data: info, error: infoError } = await supabase.storage.from('documents').info(storagePath)
+  if (infoError || !info) {
+    return { ok: false, error: 'لم يصل الملف إلى التخزين. أعد المحاولة.' }
+  }
+  const meta = info as unknown as { size?: number; contentType?: string; metadata?: { size?: number; mimetype?: string } }
+  const size = Number(meta.size ?? meta.metadata?.size ?? 0)
+  const mime = String(meta.contentType ?? meta.metadata?.mimetype ?? '')
 
   const { data, error } = await supabase
     .from('documents')
@@ -119,8 +143,8 @@ export async function uploadDocumentAction(
       case_id: input.caseId || null,
       client_id: input.clientId || null,
       storage_path: storagePath,
-      mime_type: file.type,
-      size_bytes: file.size,
+      mime_type: mime || 'application/octet-stream',
+      size_bytes: size,
       doc_date: input.docDate || null,
       description: input.description || null,
       uploaded_by: guard.user.id,
@@ -139,7 +163,7 @@ export async function uploadDocumentAction(
     entity: 'documents',
     entityId: data.id,
     entityLabel: input.name,
-    summary: `رفع مستند (${(file.size / 1024).toFixed(0)} ك.ب)`,
+    summary: `رفع مستند (${(size / 1024).toFixed(0)} ك.ب)`,
   })
 
   revalidatePath('/documents')

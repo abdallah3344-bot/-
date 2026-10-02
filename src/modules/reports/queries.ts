@@ -1,3 +1,4 @@
+import { todayISO } from '@/lib/utils'
 import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
@@ -160,7 +161,7 @@ export async function runReport(slug: string, params: ReportParams): Promise<Rep
         `)
         .is('deleted_at', null)
 
-      const today = new Date().toISOString().slice(0, 10)
+      const today = todayISO()
       if (slug === 'hearings-upcoming') {
         query = query.gte('hearing_date', from || today).eq('status', 'scheduled')
         if (to) query = query.lte('hearing_date', to)

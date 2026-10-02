@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { Printer, FileSpreadsheet, Filter, X, Loader2 } from 'lucide-react'
@@ -72,7 +73,7 @@ export function ReportToolbar({ report, options, rows, canPrint, canExport }: Pr
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${report.slug}-${new Date().toISOString().slice(0, 10)}.csv`
+    link.download = `${report.slug}-${todayISO()}.csv`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

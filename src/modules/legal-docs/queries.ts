@@ -1,3 +1,4 @@
+import { todayISO, isoDate } from '@/lib/utils'
 import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
@@ -68,7 +69,7 @@ export async function listPoas(params: SearchParams) {
     query = query
       .eq('status', 'active')
       .not('expires_at', 'is', null)
-      .lte('expires_at', soon.toISOString().slice(0, 10))
+      .lte('expires_at', isoDate(soon))
   } else if (status) {
     query = query.eq('status', status)
   }
@@ -116,7 +117,7 @@ export async function listContracts(params: SearchParams) {
     query = query
       .eq('status', 'active')
       .not('end_date', 'is', null)
-      .lte('end_date', soon.toISOString().slice(0, 10))
+      .lte('end_date', isoDate(soon))
   } else if (status) {
     query = query.eq('status', status)
   }
@@ -139,10 +140,10 @@ export async function listContracts(params: SearchParams) {
 /** عدّ ما يوشك على الانتهاء خلال 30 يومًا — لبطاقات التنبيه. */
 export async function getExpiringCounts() {
   const supabase = await createClient()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISO()
   const soon = new Date()
   soon.setDate(soon.getDate() + 30)
-  const soonIso = soon.toISOString().slice(0, 10)
+  const soonIso = isoDate(soon)
 
   const [poaSoon, poaExpired, contractSoon, contractExpired] = await Promise.all([
     supabase.from('powers_of_attorney').select('id', { count: 'exact', head: true })

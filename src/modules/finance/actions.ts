@@ -1,5 +1,6 @@
 'use server'
 
+import { isoDate } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { checkPermission } from '@/lib/auth/session'
@@ -98,7 +99,7 @@ export async function saveCaseFeeAction(
         case_fee_id: fee.id,
         seq: i + 1,
         amount,
-        due_date: due.toISOString().slice(0, 10),
+        due_date: isoDate(due),
         status: 'pending',
       }
     })

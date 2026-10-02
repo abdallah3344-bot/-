@@ -15,7 +15,7 @@ import {
 import { FormField, FormError } from '@/components/shared/form-field'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { INVOICE_STATUSES, INVOICE_STATUS_LABELS } from '@/lib/constants/enums'
-import { formatMoney } from '@/lib/utils'
+import { formatMoney, todayISO } from '@/lib/utils'
 
 const NONE = '__none__'
 const initialState: ActionResult = { ok: true }
@@ -126,7 +126,7 @@ export function InvoiceForm({
 
           <FormField name="issueDate" label="تاريخ الإصدار" required error={err('issueDate')}>
             <Input id="issueDate" name="issueDate" type="date"
-                   defaultValue={defaults?.issueDate ?? new Date().toISOString().slice(0, 10)} />
+                   defaultValue={defaults?.issueDate ?? todayISO()} />
           </FormField>
 
           <FormField name="dueDate" label="تاريخ الاستحقاق" error={err('dueDate')}>

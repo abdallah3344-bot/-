@@ -1,11 +1,12 @@
 'use client'
 
-import { useActionState, useRef, useState } from 'react'
+import { startTransition, useActionState, useRef, useState } from 'react'
 import { useActionResult } from '@/lib/use-action-result'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2, Upload, FileText } from 'lucide-react'
-import { uploadDocumentAction } from '../actions'
+import { uploadDocumentAction, prepareDocumentUploadAction } from '../actions'
+import { createClient } from '@/lib/supabase/client'
 import type { ActionResult } from '@/modules/auth/actions'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -45,7 +46,38 @@ export function UploadDialog({
   const router = useRouter()
   const [state, formAction, pending] = useActionState(uploadDocumentAction, initialState)
   const [file, setFile] = useState<File | null>(null)
+  const [sending, setSending] = useState(false)
   const nameRef = useRef<HTMLInputElement>(null)
+  const busy = pending || sending
+
+  // الملف يُرفع من المتصفح إلى التخزين مباشرة، ثم تُسجَّل بياناته على الخادم
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!file || busy) return
+    const fd = new FormData(event.currentTarget)
+    fd.delete('file')
+    const pick = (k: string) => {
+      const v = String(fd.get(k) ?? '')
+      return v && v !== NONE ? v : undefined
+    }
+    setSending(true)
+    try {
+      const prep = await prepareDocumentUploadAction({
+        mime: file.type, size: file.size, caseId: pick('caseId'), clientId: pick('clientId'),
+      })
+      if (!prep.ok) { toast.error(prep.error); return }
+      const { error } = await createClient().storage.from('documents')
+        .uploadToSignedUrl(prep.path, prep.token, file, { contentType: file.type })
+      if (error) { toast.error(`تعذّر رفع الملف: ${error.message}`); return }
+      fd.set('storagePath', prep.path)
+      fd.set('fileName', file.name.replace(/\.[^.]+$/, ''))
+      startTransition(() => formAction(fd))
+    } catch {
+      toast.error('انقطع الاتصال أثناء الرفع. أعد المحاولة.')
+    } finally {
+      setSending(false)
+    }
+  }
 
   useActionResult(state, {
     onSuccess: (message) => {
@@ -77,7 +109,7 @@ export function UploadDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form action={formAction} className="space-y-4" noValidate>
+        <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <FormError message={!state.ok && !state.fieldErrors ? state.error : null} />
 
           <FormField name="file" label="الملف" required error={err('file')}>
@@ -123,7 +155,8 @@ export function UploadDialog({
             </FormField>
 
             <FormField name="caseId" label="القضية" error={err('caseId')}>
-              <Select name="caseId" defaultValue={lockedCaseId ?? NONE}
+              {lockedCaseId ? <input type="hidden" name="caseId" value={lockedCaseId} /> : null}
+              <Select name={lockedCaseId ? undefined : 'caseId'} defaultValue={lockedCaseId ?? NONE}
                       disabled={Boolean(lockedCaseId)}>
                 <SelectTrigger id="caseId"><SelectValue placeholder="غير مرتبط بقضية" /></SelectTrigger>
                 <SelectContent>
@@ -136,7 +169,8 @@ export function UploadDialog({
             </FormField>
 
             <FormField name="clientId" label="العميل" error={err('clientId')}>
-              <Select name="clientId" defaultValue={lockedClientId ?? NONE}
+              {lockedClientId ? <input type="hidden" name="clientId" value={lockedClientId} /> : null}
+              <Select name={lockedClientId ? undefined : 'clientId'} defaultValue={lockedClientId ?? NONE}
                       disabled={Boolean(lockedClientId)}>
                 <SelectTrigger id="clientId"><SelectValue placeholder="غير محدّد" /></SelectTrigger>
                 <SelectContent>
@@ -155,12 +189,12 @@ export function UploadDialog({
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={pending || !file}>
-              {pending ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-              {pending ? 'جارٍ الرفع...' : 'رفع المستند'}
+            <Button type="submit" disabled={busy || !file}>
+              {busy ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+              {busy ? 'جارٍ الرفع...' : 'رفع المستند'}
             </Button>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}
-                    disabled={pending}>
+                    disabled={busy}>
               إلغاء
             </Button>
           </DialogFooter>

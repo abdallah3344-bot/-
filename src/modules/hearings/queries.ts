@@ -1,3 +1,4 @@
+import { isoDate } from '@/lib/utils'
 import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
@@ -32,7 +33,7 @@ const SELECT = `
 /** يحوّل نطاقًا مسمّى إلى تاريخَي بداية ونهاية. */
 export function resolveRange(range: string | undefined) {
   const today = new Date()
-  const iso = (d: Date) => d.toISOString().slice(0, 10)
+  const iso = (d: Date) => isoDate(d)
   const addDays = (d: Date, n: number) => {
     const copy = new Date(d)
     copy.setDate(copy.getDate() + n)
@@ -114,7 +115,7 @@ export async function getHearing(id: string) {
 /** إحصاء سريع لبطاقات النطاقات. */
 export async function getHearingCounts() {
   const supabase = await createClient()
-  const iso = (d: Date) => d.toISOString().slice(0, 10)
+  const iso = (d: Date) => isoDate(d)
   const today = new Date()
   const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
   const week = new Date(today); week.setDate(today.getDate() + 7)

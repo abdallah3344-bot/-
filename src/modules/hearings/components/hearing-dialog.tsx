@@ -73,7 +73,9 @@ export function HearingDialog({ open, onOpenChange, options, defaults, lockedCas
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField name="caseId" label="القضية" required error={err('caseId')}
                        className="sm:col-span-2">
-              <Select name="caseId" defaultValue={defaults?.caseId ?? lockedCaseId ?? NONE}
+              {/* الحقل المعطَّل لا يُرسل مع النموذج — نرسل القضية مخفيّة */}
+              {lockedCaseId ? <input type="hidden" name="caseId" value={lockedCaseId} /> : null}
+              <Select name={lockedCaseId ? undefined : 'caseId'} defaultValue={defaults?.caseId ?? lockedCaseId ?? NONE}
                       disabled={Boolean(lockedCaseId)}>
                 <SelectTrigger id="caseId" aria-invalid={Boolean(err('caseId'))}>
                   <SelectValue placeholder="اختر القضية" />

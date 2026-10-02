@@ -16,7 +16,7 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { formatDate, formatTime } from '@/lib/utils'
+import { formatDate, formatTime, todayISO } from '@/lib/utils'
 import {
   HEARING_STATUS_LABELS, HEARING_STATUS_TONE, HEARING_TYPE_LABELS, labelOf, toneOf,
 } from '@/lib/constants/enums'
@@ -74,7 +74,7 @@ export function HearingsView({
     setDialogOpen(true)
   }
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISO()
 
   const columns: Column<HearingRow>[] = [
     {

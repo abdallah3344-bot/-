@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -102,7 +103,7 @@ export function CorrespondenceDialog({ open, onOpenChange, options, defaults }: 
 
             <FormField name="corrDate" label="التاريخ" required error={err('corrDate')}>
               <Input id="corrDate" name="corrDate" type="date"
-                     defaultValue={defaults?.corrDate ?? new Date().toISOString().slice(0, 10)} />
+                     defaultValue={defaults?.corrDate ?? todayISO()} />
             </FormField>
 
             <FormField name="status" label="الحالة" required error={err('status')}>

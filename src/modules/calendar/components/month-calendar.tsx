@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronRight, ChevronLeft, CalendarDays } from 'lucide-react'
 import { EVENT_KINDS, type CalendarEvent } from '../constants'
 import { Button } from '@/components/ui/button'
-import { cn, formatTime } from '@/lib/utils'
+import { cn, formatTime, todayISO } from '@/lib/utils'
 
 type Props = {
   year: number
@@ -25,7 +25,7 @@ export function MonthCalendar({ year, month, events }: Props) {
   const firstDay = new Date(year, month - 1, 1)
   const daysInMonth = new Date(year, month, 0).getDate()
   const startWeekday = firstDay.getDay() // 0 = الأحد
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = todayISO()
   const pad = (n: number) => String(n).padStart(2, '0')
 
   const byDate = new Map<string, CalendarEvent[]>()

@@ -1,3 +1,4 @@
+import { todayISO } from '@/lib/utils'
 import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
@@ -69,7 +70,7 @@ export async function listTasks(params: SearchParams) {
 
 export async function getTaskCounts() {
   const supabase = await createClient()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISO()
 
   const base = () =>
     supabase.from('tasks').select('id', { count: 'exact', head: true }).is('deleted_at', null)

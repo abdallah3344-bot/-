@@ -75,7 +75,9 @@ export function TaskDialog({ open, onOpenChange, options, defaults, lockedCaseId
             </FormField>
 
             <FormField name="caseId" label="القضية" error={err('caseId')}>
-              <Select name="caseId" defaultValue={defaults?.caseId ?? lockedCaseId ?? NONE}
+              {/* الحقل المعطَّل لا يُرسل مع النموذج — نرسل القضية مخفيّة */}
+              {lockedCaseId ? <input type="hidden" name="caseId" value={lockedCaseId} /> : null}
+              <Select name={lockedCaseId ? undefined : 'caseId'} defaultValue={defaults?.caseId ?? lockedCaseId ?? NONE}
                       disabled={Boolean(lockedCaseId)}>
                 <SelectTrigger id="caseId"><SelectValue placeholder="غير مرتبطة بقضية" /></SelectTrigger>
                 <SelectContent>

@@ -1,5 +1,6 @@
 'use server'
 
+import { todayISO } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { checkPermission } from '@/lib/auth/session'
@@ -194,7 +195,7 @@ export async function closeCaseAction(id: string, reason: string): Promise<Actio
     .select('id', { count: 'exact', head: true })
     .eq('case_id', id)
     .eq('status', 'scheduled')
-    .gte('hearing_date', new Date().toISOString().slice(0, 10))
+    .gte('hearing_date', todayISO())
     .is('deleted_at', null)
 
   if ((count ?? 0) > 0) {

@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Download, Loader2, Database, ShieldCheck } from 'lucide-react'
@@ -35,7 +36,7 @@ export function BackupPanel({ frequency }: { frequency: string }) {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `law-office-backup-${new Date().toISOString().slice(0, 10)}.json`
+      link.download = `law-office-backup-${todayISO()}.json`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

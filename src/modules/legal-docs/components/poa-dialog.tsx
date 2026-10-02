@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -110,7 +111,7 @@ export function PoaDialog({ open, onOpenChange, options, defaults }: Props) {
 
             <FormField name="issuedAt" label="تاريخ الوكالة" required error={err('issuedAt')}>
               <Input id="issuedAt" name="issuedAt" type="date"
-                     defaultValue={defaults?.issuedAt ?? new Date().toISOString().slice(0, 10)}
+                     defaultValue={defaults?.issuedAt ?? todayISO()}
                      aria-invalid={Boolean(err('issuedAt'))} />
             </FormField>
 

@@ -1,3 +1,4 @@
+import { todayISO } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -41,14 +42,26 @@ export async function GET() {
   const skipped: string[] = []
   let totalRows = 0
 
+  // Supabase يعيد 1000 صف كحدّ أقصى في الطلب الواحد مهما كان limit —
+  // فالجدول الأكبر من ذلك كان يُصدَّر ناقصًا بصمت. نقرأ على دفعات.
+  const PAGE = 1000
   for (const table of EXPORT_TABLES) {
-    const { data, error } = await supabase.from(table).select('*').limit(50000)
-    if (error) {
+    const rows: unknown[] = []
+    let error: string | null = null
+    for (let from = 0; ; from += PAGE) {
+      // ترتيب ثابت (بالمعرّف) حتى لا تتكرر الصفوف أو تسقط بين الدفعات
+      const res = await supabase.from(table).select('*').order('id').range(from, from + PAGE - 1)
+      if (res.error) { error = res.error.message; break }
+      rows.push(...(res.data ?? []))
+      if ((res.data?.length ?? 0) < PAGE) break
+    }
+    if (error && rows.length === 0) {
       skipped.push(table)
       continue
     }
-    tables[table] = data ?? []
-    totalRows += data?.length ?? 0
+    if (error) skipped.push(`${table} (ناقص)`)
+    tables[table] = rows
+    totalRows += rows.length
   }
 
   await logAudit({
@@ -66,7 +79,7 @@ export async function GET() {
     tables,
   }
 
-  const filename = `law-office-backup-${new Date().toISOString().slice(0, 10)}.json`
+  const filename = `law-office-backup-${todayISO()}.json`
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {

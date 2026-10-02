@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -129,7 +130,7 @@ export function PaymentDialog({ open, onOpenChange, options, defaults }: Props) 
 
             <FormField name="paidAt" label="تاريخ القبض" required error={err('paidAt')}>
               <Input id="paidAt" name="paidAt" type="date"
-                     defaultValue={defaults?.paidAt ?? new Date().toISOString().slice(0, 10)} />
+                     defaultValue={defaults?.paidAt ?? todayISO()} />
             </FormField>
 
             <FormField name="accountId" label="الحساب" error={err('accountId')}>

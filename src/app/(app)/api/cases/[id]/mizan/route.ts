@@ -1,3 +1,4 @@
+import { todayISO } from '@/lib/utils'
 import { NextResponse, type NextRequest } from 'next/server'
 import { checkPermission } from '@/lib/auth/session'
 import { logAudit } from '@/lib/audit'
@@ -20,7 +21,7 @@ export async function GET(
     summary: `تصدير ورقة بيانات القضية (${format.toUpperCase()})`,
   })
 
-  const stamp = new Date().toISOString().slice(0, 10)
+  const stamp = todayISO()
   const filename = `case-${id.slice(0, 8)}-${stamp}.${format}`
   const disposition = `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`
 

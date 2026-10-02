@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -60,7 +61,7 @@ export function ClientForm({ mode, lawyers, defaults }: Props) {
   }, [state, mode, router])
 
   const err = (name: string) => (!state.ok ? state.fieldErrors?.[name] : undefined)
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISO()
 
   return (
     <form action={formAction} className="space-y-5" noValidate>

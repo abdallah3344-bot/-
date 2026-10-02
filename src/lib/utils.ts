@@ -19,6 +19,25 @@ export function formatMoney(amount: number | string | null | undefined, symbol =
   })} ${symbol}`
 }
 
+/**
+ * المنطقة الزمنية للمكاتب. الخادم (Cloudflare) والقاعدة يعملان بتوقيت UTC،
+ * فبين منتصف الليل والثالثة فجرًا كان «اليوم» يُحسب أمس، والأوقات
+ * المعروضة من الخادم متأخرة 3 ساعات.
+ */
+export const APP_TIME_ZONE = 'Asia/Hebron'
+
+/** تاريخ YYYY-MM-DD بتوقيت المكتب (لا UTC). */
+export function isoDate(d: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(d)
+}
+
+/** تاريخ اليوم بتوقيت المكتب. */
+export function todayISO(): string {
+  return isoDate(new Date())
+}
+
 /** تنسيق تاريخ ميلادي بالعربية: 13 سبتمبر 2026 */
 export function formatDate(value: string | Date | null | undefined) {
   if (!value) return '—'
@@ -29,6 +48,7 @@ export function formatDate(value: string | Date | null | undefined) {
     month: 'long',
     year: 'numeric',
     numberingSystem: 'latn',
+    timeZone: APP_TIME_ZONE,
   }).format(d)
 }
 
@@ -37,7 +57,8 @@ export function formatDateShort(value: string | Date | null | undefined) {
   if (!value) return '—'
   const d = typeof value === 'string' ? new Date(value) : value
   if (Number.isNaN(d.getTime())) return '—'
-  return d.toISOString().slice(0, 10)
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+  return isoDate(d)
 }
 
 /** وقت: 09:30 ص */
@@ -62,6 +83,7 @@ export function formatDateTime(value: string | Date | null | undefined) {
     hour: '2-digit',
     minute: '2-digit',
     numberingSystem: 'latn',
+    timeZone: APP_TIME_ZONE,
   }).format(d)
 }
 
@@ -88,11 +110,9 @@ export function daysUntil(value: string | Date | null | undefined): number | nul
   if (!value) return null
   const d = typeof value === 'string' ? new Date(value) : value
   if (Number.isNaN(d.getTime())) return null
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(d)
-  target.setHours(0, 0, 0, 0)
-  return Math.round((target.getTime() - today.getTime()) / 86400000)
+  const target = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value) && value.length <= 10
+    ? value : isoDate(d)
+  return Math.round((Date.parse(target) - Date.parse(todayISO())) / 86400000)
 }
 
 /** حجم ملف بصيغة مقروءة. */

@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/empty-state'
 import { CaseCharts } from '@/modules/dashboard/components/case-charts'
-import { formatMoney, formatDate, formatTime } from '@/lib/utils'
+import { formatMoney, formatDate, formatTime, todayISO } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'لوحة التحكم' }
 
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
     supabase
       .from('hearings')
       .select('id, hearing_date, hearing_time, room, cases(id, title, internal_no), courts(name_ar)')
-      .eq('hearing_date', new Date().toISOString().slice(0, 10))
+      .eq('hearing_date', todayISO())
       .eq('status', 'scheduled')
       .order('hearing_time', { ascending: true })
       .limit(6),

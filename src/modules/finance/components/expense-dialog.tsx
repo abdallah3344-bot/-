@@ -1,5 +1,6 @@
 'use client'
 
+import { todayISO } from '@/lib/utils'
 import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -107,7 +108,7 @@ export function ExpenseDialog({ open, onOpenChange, options, defaults }: Props) 
 
             <FormField name="spentAt" label="تاريخ الصرف" required error={err('spentAt')}>
               <Input id="spentAt" name="spentAt" type="date"
-                     defaultValue={defaults?.spentAt ?? new Date().toISOString().slice(0, 10)} />
+                     defaultValue={defaults?.spentAt ?? todayISO()} />
             </FormField>
 
             <FormField name="accountId" label="الحساب" error={err('accountId')}>

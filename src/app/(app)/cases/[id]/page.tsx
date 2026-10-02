@@ -21,7 +21,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatDate, formatMoney, formatTime, timeAgo } from '@/lib/utils'
+import { formatDate, formatMoney, formatTime, timeAgo, todayISO } from '@/lib/utils'
 import {
   CASE_STATUS_LABELS, CASE_STATUS_TONE, PRIORITY_LABELS, PRIORITY_TONE,
   LITIGATION_DEGREE_LABELS, HEARING_STATUS_LABELS, HEARING_STATUS_TONE,
@@ -239,7 +239,7 @@ export default async function CaseWorkspacePage({
                 <CardHeader><CardTitle>الجلسة القادمة</CardTitle></CardHeader>
                 <CardContent>
                   {(() => {
-                    const today = new Date().toISOString().slice(0, 10)
+                    const today = todayISO()
                     const next = [...hearings]
                       .filter((h) => h.hearing_date >= today && h.status === 'scheduled')
                       .sort((a, b) => a.hearing_date.localeCompare(b.hearing_date))[0]
