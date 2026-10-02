@@ -33,8 +33,8 @@ export function LicenseDevicesCard({ data }: { data: LicenseDevices | null }) {
           </Badge>
         </CardTitle>
         <CardDescription>
-          كل حاسوب أو جوال يدخل منه موظفو المكتب يُسجَّل هنا برقم ثابت. الجهاز الجديد لا يعمل
-          إلا بعد موافقة مكتب البرمجيات، ولإزالة جهاز لم يعد مستعملًا تواصل معه.
+          كل حاسوب أو جوال يدخل منه موظفو المكتب يُسجَّل هنا تلقائيًا برقم ثابت، حتى الحد
+          الأقصى للترخيص. لإزالة جهاز لم يعد مستعملًا أو لزيادة العدد تواصل مع مكتب البرمجيات.
         </CardDescription>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-gold-500" style={{ width: `${pct}%` }} />
