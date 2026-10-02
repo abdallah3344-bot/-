@@ -255,20 +255,20 @@ export const getLicenseStatus = cache(async (): Promise<LicenseStatus> => {
 
   let licenseKey = inputs.licenseKey
   let usedDevice = inputs.deviceId
-  let result
-  if (licenseKey && browserDevice) {
-    result = await viaBrowser(licenseKey)
-    usedDevice = browserDevice
-    if (result.ok && result.data.state === 'invalid_key') {
-      result = await viaOffice()
-      usedDevice = inputs.deviceId
-    }
-  } else {
+  let result = licenseKey && browserDevice ? await viaBrowser(licenseKey) : null
+  if (result) usedDevice = browserDevice!
+
+  // لا مفتاح محفوظ، أو تغيّر المفتاح في اللوحة (اعتماد التجربة يولّد مفتاحًا
+  // جديدًا): نتحقق بمعرّف المكتب، ونحفظ المفتاح الذي يعيده، ثم نسجّل المتصفح.
+  if (!result || (result.ok && result.data.state === 'invalid_key')) {
     result = await viaOffice()
-    const learned = result.ok && result.data.ok === true ? result.data.licenseKey : null
+    usedDevice = inputs.deviceId
+    const learned = result.ok && result.data.ok === true ? result.data.licenseKey ?? null : null
     if (learned && browserDevice) {
-      const supabase = await createClient()
-      await supabase.rpc('remember_license_key', { p_key: learned } as never)
+      if (learned !== licenseKey) {
+        const supabase = await createClient()
+        await supabase.rpc('remember_license_key', { p_key: learned } as never)
+      }
       licenseKey = learned
       result = await viaBrowser(learned)
       usedDevice = browserDevice

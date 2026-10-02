@@ -18,7 +18,7 @@ begin
   update public.license_state
      set license_key = p_key
    where office_id = public.current_office_id()
-     and license_key is null;
+     and license_key is distinct from p_key;
 end;
 $$;
 
