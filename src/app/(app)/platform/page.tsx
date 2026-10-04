@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { formatDate, timeAgo } from '@/lib/utils'
 import { LICENSE_STATE_LABELS } from '@/modules/license/constants'
+import { getOfficesLicenseLive } from '@/modules/license/service'
 import { OfficeActiveSwitch, OfficeSlugEditor } from '@/modules/offices/components/office-row-actions'
 
 export const metadata: Metadata = { title: 'المكاتب المشتركة' }
@@ -60,10 +61,16 @@ export default async function PlatformPage() {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('platform_offices')
   if (error) throw new Error(`تعذّر تحميل المكاتب: ${error.message}`)
-  const offices = (data ?? []) as OfficeRow[]
+  const live = await getOfficesLicenseLive()
+  // الحالة الحيّة من لوحة التراخيص تتقدّم على آخر حالة سجّلها المكتب
+  const offices = ((data ?? []) as OfficeRow[]).map((o) => {
+    const l = live.get(o.id)
+    return { ...o, license_state: l?.state ?? o.license_state, live: l ?? null }
+  })
 
   const active = offices.filter((o) => o.is_active).length
-  const pending = offices.filter((o) => o.license_state === 'trial_pending' || o.license_state === 'device_pending').length
+  const pending = offices.filter((o) =>
+    o.license_state === 'trial_pending' || o.license_state === 'device_pending' || (o.live?.pending ?? 0) > 0).length
   const workingThisWeek = offices.filter((o) => Number(o.ops_week) > 0).length
 
   return (
@@ -79,7 +86,7 @@ export default async function PlatformPage() {
         <StatCard label="يعملون هذا الأسبوع" value={workingThisWeek} icon="History" tone="success"
           hint="مكاتب أدخلت أو عدّلت بيانات خلال 7 أيام" />
         <StatCard label="بانتظار اعتماد الترخيص" value={pending} icon="Bell" tone={pending ? 'warning' : 'default'}
-          hint="اعتمدها من لوحة التراخيص" />
+          hint="طلبات تجريبية أو أجهزة جديدة — اعتمدها من لوحة التراخيص" />
       </div>
 
       <Card>
@@ -137,6 +144,14 @@ export default async function PlatformPage() {
                       <Badge variant={LICENSE_TONE[o.license_state ?? ''] ?? 'muted'}>
                         {o.license_state ? (LICENSE_STATE_LABELS[o.license_state] ?? o.license_state) : 'لم يدخل بعد'}
                       </Badge>
+                      {o.live ? (
+                        <div className="mt-1 text-xs text-muted-foreground tabular-nums">
+                          الأجهزة {o.live.approved} من {o.live.maxDevices}
+                        </div>
+                      ) : null}
+                      {o.live && o.live.pending > 0 ? (
+                        <Badge variant="warning" className="mt-1">{o.live.pending} جهاز بانتظار الموافقة</Badge>
+                      ) : null}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {o.last_activity ? timeAgo(o.last_activity) : '—'}

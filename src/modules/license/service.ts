@@ -313,3 +313,43 @@ export const getLicenseStatus = cache(async (): Promise<LicenseStatus> => {
     degraded: false,
   }
 })
+
+export type OfficeLicenseLive = {
+  state: string
+  expiresAt: string | null
+  maxDevices: number
+  approved: number
+  pending: number
+}
+
+/**
+ * حالة ترخيص كل مكتب كما هي الآن في لوحة التراخيص — لصفحة مالك المنصة.
+ * لا تسجّل أي جهاز؛ تقرأ فقط. وتحدّث الحالة المحفوظة إن تغيّرت.
+ * عند تعذّر الوصول للوحة ترجع خريطة فارغة، فتعرض الصفحة الحالة المحفوظة.
+ */
+export async function getOfficesLicenseLive(): Promise<Map<string, OfficeLicenseLive>> {
+  const live = new Map<string, OfficeLicenseLive>()
+  const supabase = await createClient()
+  const { data: refs } = await supabase.rpc('platform_license_refs' as never)
+  const rows = (refs ?? []) as { office_id: string; license_key: string | null; device_id: string | null }[]
+  if (!rows.length) return live
+
+  const result = await licenseRpc<{
+    ref: string; state: string; expires_at: string | null; max_devices: number; approved: number; pending: number
+  }[]>('client_license_overview', {
+    p_program: LICENSE_PROGRAM,
+    p_refs: rows.map((r) => ({ ref: r.office_id, key: r.license_key, device: r.device_id })),
+  })
+  if (!Array.isArray(result)) return live
+
+  for (const r of result) {
+    live.set(r.ref, {
+      state: r.state, expiresAt: r.expires_at,
+      maxDevices: Number(r.max_devices), approved: Number(r.approved), pending: Number(r.pending),
+    })
+  }
+
+  await Promise.all([...live].map(([officeId, l]) =>
+    supabase.rpc('platform_sync_license_state' as never, { p_office: officeId, p_state: l.state } as never)))
+  return live
+}
