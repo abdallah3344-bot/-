@@ -52,14 +52,6 @@ export default async function ActivationPage() {
                 {status.deviceId || inputs?.deviceId}
               </dd>
             </div>
-            {status.browserDeviceId ? (
-              <div className="mt-2 flex items-center justify-between gap-4">
-                <dt className="text-muted-foreground">رمز هذا الجهاز</dt>
-                <dd className="font-mono text-sm font-bold" dir="ltr">
-                  {status.browserDeviceId.replace(/-/g, '').slice(0, 8).toUpperCase()}
-                </dd>
-              </div>
-            ) : null}
             {inputs?.licenseKey ? (
               <div className="mt-2 flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">مفتاح الترخيص</dt>

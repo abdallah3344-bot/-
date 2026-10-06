@@ -70,7 +70,7 @@ export default async function PlatformPage() {
 
   const active = offices.filter((o) => o.is_active).length
   const pending = offices.filter((o) =>
-    o.license_state === 'trial_pending' || o.license_state === 'device_pending' || (o.live?.pending ?? 0) > 0).length
+    o.license_state === 'trial_pending' || o.license_state === 'device_pending').length
   const workingThisWeek = offices.filter((o) => Number(o.ops_week) > 0).length
 
   return (
@@ -86,7 +86,7 @@ export default async function PlatformPage() {
         <StatCard label="يعملون هذا الأسبوع" value={workingThisWeek} icon="History" tone="success"
           hint="مكاتب أدخلت أو عدّلت بيانات خلال 7 أيام" />
         <StatCard label="بانتظار اعتماد الترخيص" value={pending} icon="Bell" tone={pending ? 'warning' : 'default'}
-          hint="طلبات تجريبية أو أجهزة جديدة — اعتمدها من لوحة التراخيص" />
+          hint="طلبات تجريبية جديدة — اعتمدها من لوحة التراخيص" />
       </div>
 
       <Card>
@@ -146,11 +146,8 @@ export default async function PlatformPage() {
                       </Badge>
                       {o.live ? (
                         <div className="mt-1 text-xs text-muted-foreground tabular-nums">
-                          الأجهزة {o.live.approved} من {o.live.maxDevices}
+                          المستخدمون {o.users_count} من {o.live.maxDevices}
                         </div>
-                      ) : null}
-                      {o.live && o.live.pending > 0 ? (
-                        <Badge variant="warning" className="mt-1">{o.live.pending} جهاز بانتظار الموافقة</Badge>
                       ) : null}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">

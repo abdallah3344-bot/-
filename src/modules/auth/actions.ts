@@ -71,6 +71,9 @@ export async function loginAction(_prev: unknown, formData: FormData): Promise<A
     }
   }
 
+  // المستخدم الواحد مفتوح على جهازين على الأكثر: الدخول من ثالث يُخرج الأقدم
+  await supabase.rpc('trim_my_sessions' as never, { p_keep: 2 } as never)
+
   await supabase
     .from('profiles')
     .update({ last_login_at: new Date().toISOString() })

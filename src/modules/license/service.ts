@@ -1,7 +1,6 @@
 import 'server-only'
 
 import { cache } from 'react'
-import { cookies, headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { LICENSE_PROGRAM, VALID_STATES } from './constants'
 
@@ -32,21 +31,7 @@ export type LicenseStatus = {
   deviceId: string
   /** صحيح حين تعذّر الوصول للخادم وسُمح بالمتابعة مؤقتًا. */
   degraded: boolean
-  /** معرّف هذا الجهاز/المتصفح كما يُعدّ في الترخيص (إن وُجد). */
-  browserDeviceId?: string | null
 }
-
-export type LicenseDevice = {
-  no: number | null
-  name: string | null
-  status: string
-  code: string
-  first_seen_at: string
-  last_seen_at: string | null
-  is_current: boolean
-}
-
-export type LicenseDevices = { maxDevices: number; used: number; devices: LicenseDevice[] }
 
 export type LicenseInputs = {
   deviceId: string
@@ -138,23 +123,7 @@ export const getLicenseInputs = cache(async (): Promise<LicenseInputs | null> =>
   }
 })
 
-const DEVICE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-
-/** معرّف هذا المتصفح (يضعه proxy في كوكي ثابت). */
-export async function getBrowserDeviceId(): Promise<string | null> {
-  const v = (await cookies()).get('law_dev')?.value ?? ''
-  return DEVICE_RE.test(v) ? v : null
-}
-
-/** اسم مقروء للجهاز من المتصفح: «Chrome · Windows». */
-function describeDevice(ua: string): string {
-  const browser = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox'
-    : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'متصفح'
-  const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android'
-    : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : ''
-  return os ? `${browser} · ${os}` : browser
-}
-
+/** نداء دالة في لوحة التراخيص عبر REST — من الخادم فقط. */
 async function licenseRpc<T>(fn: string, body: Record<string, unknown>): Promise<T | null> {
   const key = process.env.LICENSE_API_KEY
   const url = process.env.LICENSE_API_URL?.replace(/\/+$/, '')
@@ -171,30 +140,15 @@ async function licenseRpc<T>(fn: string, body: Record<string, unknown>): Promise
   }
 }
 
-// أجهزة سُمّيت في هذه النسخة من الخادم — حتى لا نكرر الطلب مع كل صفحة
-const namedDevices = new Set<string>()
+export type LicenseUsers = { used: number; max: number | null }
 
-async function nameDeviceOnce(licenseKey: string, deviceId: string) {
-  if (namedDevices.has(deviceId)) return
-  namedDevices.add(deviceId)
-  const ua = (await headers()).get('user-agent') ?? ''
-  await licenseRpc('client_name_device', {
-    p_program: LICENSE_PROGRAM, p_license_key: licenseKey, p_device_id: deviceId, p_name: describeDevice(ua),
-  })
-}
-
-/** أجهزة ترخيص المكتب — تُعرض للمكتب نفسه في الإعدادات. */
-export async function getLicenseDevices(): Promise<LicenseDevices | null> {
-  // بعد التحقق: قد يكون المفتاح تحدّث للتو في هذا الطلب نفسه
-  const status = await getLicenseStatus()
-  const device = await getBrowserDeviceId()
-  if (!status.licenseKey || !device) return null
-  const data = await licenseRpc<{ ok: boolean; max_devices: number; used: number; devices: LicenseDevice[] }>(
-    'client_license_devices',
-    { p_program: LICENSE_PROGRAM, p_license_key: status.licenseKey, p_device_id: device },
-  )
-  if (!data?.ok) return null
-  return { maxDevices: data.max_devices, used: data.used, devices: data.devices ?? [] }
+/** عدد مستخدمي المكتب الفعّالين وحد الترخيص — لبطاقة الترخيص في الإعدادات. */
+export async function getLicenseUsers(): Promise<LicenseUsers | null> {
+  const supabase = await createClient()
+  const { data } = await supabase.rpc('my_office_user_usage' as never)
+  const d = data as { used?: number; max?: number | null } | null
+  if (!d) return null
+  return { used: Number(d.used ?? 0), max: d.max == null ? null : Number(d.max) }
 }
 
 /**
@@ -238,47 +192,35 @@ export const getLicenseStatus = cache(async (): Promise<LicenseStatus> => {
     }
   }
 
-  // كل متصفح جهاز مستقل في الترخيص: يُعدّ من الحد الأقصى، والجديد ينتظر
-  // الموافقة. يلزم لذلك مفتاح ترخيص المكتب؛ قبل معرفته (طلب تجريبي قيد
-  // المراجعة) يجري التحقق بمعرّف المكتب كما كان، ثم يُحفظ المفتاح.
-  const browserDevice = await getBrowserDeviceId()
-  const viaOffice = () => callVerifyLicense({
-    deviceId: inputs.deviceId,
-    licenseKey: inputs.licenseKey,
-    phone: inputs.phone,
-    clientName: inputs.clientName,
-  })
-  const viaBrowser = (key: string) => callVerifyLicense({
-    deviceId: browserDevice!,
-    licenseKey: key,
-    phone: inputs.phone,
-    clientName: inputs.clientName,
-  })
-
+  // الترخيص على المكتب كله لا على المتصفح: التحقق بمعرّف المكتب، فيدخل
+  // المستخدمون من أي جهاز ومتصفح. والحد هو عدد المستخدمين (يُفرض في القاعدة).
   let licenseKey = inputs.licenseKey
-  let usedDevice = inputs.deviceId
-  let result = licenseKey && browserDevice ? await viaBrowser(licenseKey) : null
-  if (result) usedDevice = browserDevice!
+  const usedDevice = inputs.deviceId
+  let result = await callVerifyLicense({
+    deviceId: inputs.deviceId,
+    licenseKey,
+    phone: inputs.phone,
+    clientName: inputs.clientName,
+  })
 
-  // لا مفتاح محفوظ، أو تغيّر المفتاح في اللوحة (اعتماد التجربة يولّد مفتاحًا
-  // جديدًا): نتحقق بمعرّف المكتب، ونحفظ المفتاح الذي يعيده، ثم نسجّل المتصفح.
-  if (!result || (result.ok && result.data.state === 'invalid_key')) {
-    result = await viaOffice()
-    usedDevice = inputs.deviceId
-    const learned = result.ok && result.data.ok === true ? result.data.licenseKey ?? null : null
-    if (learned && browserDevice) {
-      if (learned !== licenseKey) {
-        const supabase = await createClient()
-        await supabase.rpc('remember_license_key', { p_key: learned } as never)
-      }
-      licenseKey = learned
-      result = await viaBrowser(learned)
-      usedDevice = browserDevice
-    }
+  // تغيّر المفتاح في اللوحة (اعتماد التجربة يولّد مفتاحًا جديدًا): نحفظ الجديد
+  const learned = result.ok && result.data.ok === true ? result.data.licenseKey ?? null : null
+  if (learned && learned !== licenseKey) {
+    const supabase = await createClient()
+    await supabase.rpc('remember_license_key', { p_key: learned } as never)
+    licenseKey = learned
   }
-
-  if (licenseKey && usedDevice === browserDevice && browserDevice && result.ok) {
-    await nameDeviceOnce(licenseKey, browserDevice)
+  if (result.ok && result.data.state === 'invalid_key' && licenseKey) {
+    // مفتاح محفوظ قديم: نعيد بلا مفتاح ليُعرف الترخيص من جهاز المكتب
+    result = await callVerifyLicense({
+      deviceId: inputs.deviceId, licenseKey: null, phone: inputs.phone, clientName: inputs.clientName,
+    })
+    const relearned = result.ok && result.data.ok === true ? result.data.licenseKey ?? null : null
+    if (relearned) {
+      const supabase = await createClient()
+      await supabase.rpc('remember_license_key', { p_key: relearned } as never)
+      licenseKey = relearned
+    }
   }
 
   if (!result.ok) {
@@ -309,7 +251,6 @@ export const getLicenseStatus = cache(async (): Promise<LicenseStatus> => {
     isLifetime: data.isLifetime === true,
     licenseKey: data.licenseKey ?? licenseKey,
     deviceId: usedDevice,
-    browserDeviceId: browserDevice,
     degraded: false,
   }
 })

@@ -9,9 +9,9 @@ import { LookupManager } from '@/modules/settings/components/lookup-manager'
 import { BackupPanel } from '@/modules/settings/components/backup-panel'
 import { DemoDataPanel } from '@/modules/settings/components/demo-data-panel'
 import { Card, CardContent } from '@/components/ui/card'
-import { getLicenseStatus, getLicenseDevices } from '@/modules/license/service'
+import { getLicenseStatus, getLicenseUsers } from '@/modules/license/service'
 import { LicenseCard } from '@/modules/license/components/license-card'
-import { LicenseDevicesCard } from '@/modules/license/components/license-devices-card'
+import { LicenseUsersCard } from '@/modules/license/components/license-users-card'
 
 export const metadata: Metadata = { title: 'الإعدادات' }
 
@@ -30,7 +30,7 @@ export default async function SettingsPage() {
   ])
 
   const settings = (settingsRes.data ?? {}) as Record<string, unknown>
-  const [license, licenseDevices] = await Promise.all([getLicenseStatus(), getLicenseDevices()])
+  const [license, licenseUsers] = await Promise.all([getLicenseStatus(), getLicenseUsers()])
 
   return (
     <>
@@ -103,7 +103,7 @@ export default async function SettingsPage() {
         <TabsContent value="license">
           <div className="max-w-3xl space-y-4">
             <LicenseCard status={license} />
-            <LicenseDevicesCard data={licenseDevices} />
+            <LicenseUsersCard data={licenseUsers} />
           </div>
         </TabsContent>
       </Tabs>
