@@ -114,3 +114,51 @@ $$;
 
 revoke all on function public.my_login_history(integer) from public, anon;
 grant execute on function public.my_login_history(integer) to authenticated;
+
+-- جهاز الجلسة وعنوانه كما يراهما المستخدم (الدخول يجري على الخادم، فما
+-- تسجّله auth.sessions هو جهاز الخادم). يُكتب بعد الدخول مباشرة.
+create table if not exists public.session_devices (
+  session_id uuid primary key,
+  user_id    uuid not null,
+  user_agent text,
+  ip         text,
+  created_at timestamptz not null default now()
+);
+alter table public.session_devices enable row level security;
+revoke all on public.session_devices from anon, authenticated;
+
+create or replace function public.note_my_session(p_user_agent text, p_ip text)
+returns void
+language plpgsql
+security definer
+set search_path to 'public', 'pg_temp'
+as $$
+declare
+  _sid uuid := nullif(auth.jwt() ->> 'session_id', '')::uuid;
+begin
+  if auth.uid() is null or _sid is null then return; end if;
+  insert into public.session_devices (session_id, user_id, user_agent, ip)
+  values (_sid, auth.uid(), left(p_user_agent, 400), left(p_ip, 64))
+  on conflict (session_id) do update set user_agent = excluded.user_agent, ip = excluded.ip;
+end;
+$$;
+
+revoke all on function public.note_my_session(text, text) from public, anon;
+grant execute on function public.note_my_session(text, text) to authenticated;
+
+create or replace function public.my_sessions()
+returns table (id uuid, created_at timestamptz, last_active timestamptz, user_agent text, ip text, is_current boolean)
+language sql
+stable
+security definer
+set search_path to 'public', 'auth', 'pg_temp'
+as $$
+  select s.id, s.created_at,
+         greatest(s.created_at, s.updated_at, (s.refreshed_at at time zone 'UTC')) as last_active,
+         d.user_agent, d.ip,
+         s.id = nullif(auth.jwt() ->> 'session_id', '')::uuid
+    from auth.sessions s
+    left join public.session_devices d on d.session_id = s.id
+   where s.user_id = auth.uid()
+   order by s.id = nullif(auth.jwt() ->> 'session_id', '')::uuid desc, 3 desc;
+$$;

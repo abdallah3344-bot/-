@@ -35,7 +35,7 @@ export async function logAudit(entry: AuditEntry): Promise<void> {
       _entity_label: entry.entityLabel ?? undefined,
       _summary: entry.summary ?? undefined,
       _changes: (entry.changes ?? undefined) as never,
-      _ip: h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? undefined,
+      _ip: h.get('cf-connecting-ip') ?? h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? undefined,
       _user_agent: h.get('user-agent') ?? undefined,
     })
   } catch (error) {

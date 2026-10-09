@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { logAudit } from '@/lib/audit'
 import { getHostOffice } from '@/lib/office-host'
+import { noteSession } from '@/modules/security/note-session'
 import {
   loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema,
 } from './schema'
@@ -73,6 +74,7 @@ export async function loginAction(_prev: unknown, formData: FormData): Promise<A
 
   // المستخدم الواحد مفتوح على جهازين على الأكثر: الدخول من ثالث يُخرج الأقدم
   await supabase.rpc('trim_my_sessions' as never, { p_keep: 2 } as never)
+  await noteSession(supabase)
 
   await supabase
     .from('profiles')
