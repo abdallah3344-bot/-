@@ -18,6 +18,7 @@ export function RegisterForm() {
   const [state, formAction, pending] = useActionState(registerOfficeAction, initialState)
   // React يُفرّغ الحقول بعد كل إرسال — نحفظها حتى لا يعيد المستخدم كتابتها عند خطأ
   const [values, setValues] = useState<Values>({ officeName: '', slug: '', fullName: '', phone: '', username: '', email: '' })
+  const [accepted, setAccepted] = useState(false)
   const set = (k: keyof Values) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setValues((v) => ({ ...v, [k]: k === 'slug' ? e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') : e.target.value }))
 
@@ -115,7 +116,20 @@ export function RegisterForm() {
         </FormField>
       </div>
 
-      <Button type="submit" className="w-full" size="lg" disabled={pending || slugCheck.state === 'bad' || slugCheck.state === 'checking'}>
+      <div className="space-y-1">
+        <label htmlFor="acceptTerms" className="flex cursor-pointer items-start gap-2 text-sm leading-relaxed">
+          <input id="acceptTerms" name="acceptTerms" type="checkbox" checked={accepted}
+            onChange={(e) => setAccepted(e.target.checked)}
+            className="mt-1 size-4 shrink-0 accent-[var(--color-gold-500)]" aria-invalid={Boolean(err('acceptTerms'))} />
+          <span>
+            قرأت <Link href="/privacy" target="_blank" className="font-medium underline underline-offset-4">سياسة الخصوصية وشروط الاستخدام</Link> وأوافق عليها.
+            بيانات مكتبك ملكك، ولا نطّلع عليها ولا نشاركها.
+          </span>
+        </label>
+        {err('acceptTerms') ? <p className="text-xs text-danger">{err('acceptTerms')}</p> : null}
+      </div>
+
+      <Button type="submit" className="w-full" size="lg" disabled={pending || !accepted || slugCheck.state === 'bad' || slugCheck.state === 'checking'}>
         {pending ? (
           <><Loader2 className="size-4 animate-spin" /> جارٍ إنشاء المكتب...</>
         ) : (

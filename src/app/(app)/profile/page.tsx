@@ -8,11 +8,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { MODULE_LABELS, type Module } from '@/lib/auth/permissions'
+import { getMySessions, getMyLoginHistory } from '@/modules/security/queries'
+import { SessionsCard } from '@/modules/security/components/sessions-card'
 
 export const metadata: Metadata = { title: 'الملف الشخصي' }
 
 export default async function ProfilePage() {
   const user = await requireAuth()
+  const [sessions, history] = await Promise.all([getMySessions(), getMyLoginHistory(10)])
 
   // تجميع الصلاحيات حسب الوحدة لعرضها للمستخدم
   const byModule = new Map<string, number>()
@@ -43,6 +46,9 @@ export default async function ProfilePage() {
             username={user.username}
             email={user.email}
           />
+          <div className="mt-5" id="devices">
+            <SessionsCard sessions={sessions} history={history} />
+          </div>
         </div>
 
         <Card className="h-fit">

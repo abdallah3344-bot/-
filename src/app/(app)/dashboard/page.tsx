@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/empty-state'
 import { CaseCharts } from '@/modules/dashboard/components/case-charts'
 import { formatMoney, formatDate, formatTime, todayISO } from '@/lib/utils'
+import { getOfficeTermsStatus } from '@/modules/security/queries'
+import { TERMS_VERSION } from '@/modules/security/terms'
+import { TermsNotice } from '@/modules/security/components/terms-notice'
 
 export const metadata: Metadata = { title: 'لوحة التحكم' }
 
@@ -52,8 +55,14 @@ export default async function DashboardPage() {
   const todayHearings = todayRes.data ?? []
   const openTasks = tasksRes.data ?? []
 
+  // مدير المكتب يُطلب منه الموافقة على السياسة مرة لكل إصدار
+  const canAcceptTerms = user.permissions.can('settings', 'update') && !user.isPlatformAdmin
+  const terms = canAcceptTerms ? await getOfficeTermsStatus() : null
+  const needsTerms = canAcceptTerms && terms?.version !== TERMS_VERSION
+
   return (
     <>
+      {needsTerms ? <TermsNotice /> : null}
       <PageHeader
         title={`أهلًا، ${user.fullName}`}
         description="نظرة عامة على نشاط المكتب اليوم"

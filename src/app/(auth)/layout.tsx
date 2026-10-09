@@ -56,6 +56,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
             <span className="text-lg font-semibold">{officeName}</span>
           </div>
           {children}
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            <a href="/privacy" target="_blank" className="underline underline-offset-4 hover:text-foreground">سياسة الخصوصية وشروط الاستخدام</a>
+          </p>
         </div>
       </div>
     </div>

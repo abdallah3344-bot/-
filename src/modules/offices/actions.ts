@@ -1,5 +1,6 @@
 'use server'
 
+import { TERMS_VERSION } from '@/modules/security/terms'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -73,7 +74,11 @@ export async function registerOfficeAction(_prev: unknown, formData: FormData): 
     password: v.password,
   })
   // الربط بعد الدخول: تسجيل حالته يحتاج أن يكون المستخدم مدير المكتب
-  if (!signInError && result.office_id) await linkOfficeDomain(result.office_id, v.slug)
+  if (!signInError && result.office_id) {
+    await linkOfficeDomain(result.office_id, v.slug)
+    // الموافقة على السياسة تُحفظ باسم مدير المكتب الذي سجّل
+    await supabase.rpc('accept_office_terms' as never, { p_version: TERMS_VERSION } as never)
+  }
 
   revalidatePath('/', 'layout')
   return { ok: true, done: { site: officeHost(v.slug), signedIn: !signInError } }

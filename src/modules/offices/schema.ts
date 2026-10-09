@@ -27,6 +27,7 @@ export const registerOfficeSchema = z
       .regex(/[A-Z]/, 'يجب أن تحتوي على حرف كبير')
       .regex(/[0-9]/, 'يجب أن تحتوي على رقم'),
     confirmPassword: z.string(),
+    acceptTerms: z.literal('on', { message: 'يجب الموافقة على سياسة الخصوصية وشروط الاستخدام' }),
   })
   .refine((v) => v.password === v.confirmPassword, {
     path: ['confirmPassword'],
