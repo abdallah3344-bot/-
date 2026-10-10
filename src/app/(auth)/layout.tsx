@@ -57,6 +57,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           </div>
           {children}
           <p className="mt-8 text-center text-xs text-muted-foreground">
+            <a href="/guide" target="_blank" className="underline underline-offset-4 hover:text-foreground">دليل الاستخدام</a>
+            {' · '}
             <a href="/privacy" target="_blank" className="underline underline-offset-4 hover:text-foreground">سياسة الخصوصية وشروط الاستخدام</a>
           </p>
         </div>
